@@ -9,6 +9,17 @@
 #include "parser/include/parser.h"
 #include <lexer/include/lexer.h>
 
+#include <stdlib.h>
+#include <string.h>
+
+char *strndup(const char *s, size_t n) {
+    size_t len = strnlen(s, n);
+    char *new_str = malloc(len + 1);
+    if (!new_str) return NULL;
+    memcpy(new_str, s, len);
+    new_str[len] = '\0';
+    return new_str;
+}
 int main(int argc, char *argv[])
 {
     if (argc == 1)
