@@ -17,6 +17,18 @@ class Environment:
             else:
                 raise NameError(f"Cannot access to undeclared variable \"{node.name}\"")
 
+        elif isinstance(node, ArrayAccess):
+            if (self.symbol_table.find_symbol(node.name)):
+                index = self.evaluate(node.index)
+                size = self.symbol_table.get_size(node.name)
+                
+                if index >= int(size):
+                    raise IndexError("Array index out of range")
+
+                return generate_array_access(node.name, index)
+            else:
+                raise NameError(f"Cannot access to undeclared array \"{node.name}\"")
+
         elif isinstance(node, UnaryOp):
             right = self.evaluate(node.right)
 
@@ -29,12 +41,24 @@ class Environment:
             return generate_BinOp(left, node.operator, right)
 
         elif isinstance(node, VariableAssignment):
-            value = self.evaluate(node.value)
-
             if (self.symbol_table.find_symbol(node.name)):
+                value = self.evaluate(node.value)
                 return generate_AssignOp(self.symbol_table, node.name, node.operator, value)
             else:
                 raise NameError(f"Assignment operation on undeclared variable \"{node.name}\"")
+
+        elif isinstance(node, ArrayAssignment):
+            if (self.symbol_table.find_symbol(node.name)):
+                index = self.evaluate(node.index)
+                value = self.evaluate(node.value)
+                size = self.symbol_table.get_size(node.name)
+
+                if index >= int(size):
+                    raise IndexError("Array index out of range")
+
+                return generate_ArrayAssignOp(self.symbol_table, node.name, index, node.operator, value)
+            else:
+                raise NameError(f"Assignment operation on undeclared array \"{node.name}\"")
 
         elif isinstance(node, Group):
             group = self.evaluate(node.group)
@@ -51,12 +75,34 @@ class Environment:
 
                 is_const = (node.type_modifier == "const") if node.type_modifier else False
                 var = Variable(node.primary_type, node.name, value, is_const)
-                self.symbol_table.content[node.name] = var
+                self.symbol_table.add_variable(var)
 
                 code += generate_variable_declaration(self.symbol_table, node.type_modifier, node.primary_type, node.name, value)
                 return code
             else:
                 raise NameError(f"Redeclaration of variable \"{node.name}\"")
+
+        elif isinstance(node, ArrayDeclaration):
+            if (not self.symbol_table.find_symbol(node.name)):
+                code = ""
+
+                size = self.evaluate(node.size)
+                content = []
+                if node.content is not None:
+                    for value in node.content:
+                        content.append(self.evaluate(value))
+
+                if len(content) >= int(size):
+                    raise IndexError(f"Array content exceeds size")
+
+                is_const = (node.type_modifier == "const") if node.type_modifier else False
+                var = Variable(node.primary_type, node.name, value, is_const)
+                self.symbol_table.add_variable(var)
+
+                code += generate_array_declaration(self.symbol_table, node.type_modifier, node.primary_type, node.name, size, content)
+                return code
+            else:
+                raise NameError(f"Redeclaration of array \"{node.name}\"")
 
         elif isinstance(node, CodeBlock):
             statement_list = []

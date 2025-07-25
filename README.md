@@ -4,6 +4,8 @@
 *Shard* is a compiled programming language in active development.
 
 ## Features
+- Static arrays (a[size] = [e1, e2, e3, e4])
+- Unsigned types (ubte, uword, udword, uqword)
 - Comments (#)
 - Constants
 - Flow control statements
@@ -12,7 +14,7 @@
 - Booleans, bit-boolean, assignment, bit-shifting and comparison operators
 - If/else conditions
 - Complete CLI
-- Static and strongly typed variables (byte, word, dword, qword)
+- Static and strongly typed variables (byte, word, dword, qword, float, double)
 - Division by zero handling
 - Floating numbers support
 - Arithmetic expressions

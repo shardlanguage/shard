@@ -1,0 +1,8 @@
+.vscode/
+parser_out/
+build/
+dist/
+test/
+src/__pycache__/
+src/utils/__pycache__/
+shardc.spec

@@ -6,12 +6,16 @@ import shutil
 from parser import parser
 from environment import Environment
 
-def replace_extension(filename, new_ext):
+def replace_extension(filename, new_ext=None):
     if '.' in filename:
         base, _ = filename.rsplit('.', 1)
+    else:
+        base = filename
+
+    if new_ext:
         return f"{base}.{new_ext}"
     else:
-        return f"{filename}.{new_ext}"
+        return base
 
 def compile_to_c(inputf):
     if os.path.exists(inputf):

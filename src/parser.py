@@ -67,6 +67,12 @@ def p_expression_variable_access(p):
     """
     p[0] = VariableAccess(p[1])
 
+def p_expression_array_access(p):
+    """
+    expression : ID LSQB expression RSQB
+    """
+    p[0] = ArrayAccess(p[1], p[3])
+
 def p_expression_unary_op(p):
     """
     expression : PLUS expression %prec POSITIVE
@@ -114,6 +120,22 @@ def p_expression_variable_assignment(p):
     """
     p[0] = VariableAssignment(p[1], p[2], p[3])
 
+def p_expression_array_assignment(p):
+    """
+    expression : ID LSQB expression RSQB EQUAL expression
+               | ID LSQB expression RSQB PLUSEQ expression
+               | ID LSQB expression RSQB MINUSEQ expression
+               | ID LSQB expression RSQB STAREQ expression
+               | ID LSQB expression RSQB SLASHEQ expression
+               | ID LSQB expression RSQB ANDEQ expression
+               | ID LSQB expression RSQB OREQ expression
+               | ID LSQB expression RSQB XOREQ expression
+               | ID LSQB expression RSQB NOTEQ expression
+               | ID LSQB expression RSQB LSHIFTEQ expression
+               | ID LSQB expression RSQB RSHIFTEQ expression
+    """
+    p[0] = ArrayAssignment(p[1], p[3], p[5], p[6])
+
 def p_expression_group(p):
     """
     expression : LPAR expression RPAR
@@ -129,6 +151,16 @@ def p_declaration_variable(p):
         p[0] = VariableDeclaration(p[1][0], p[1][1], p[2], None)
     else:
         p[0] = VariableDeclaration(p[1][0], p[1][1], p[2], p[4])
+
+def p_declaration_array(p):
+    """
+    declaration : datatype ID LSQB expression RSQB
+                | datatype ID LSQB expression RSQB EQUAL LSQB expression_list RSQB
+    """
+    if len(p) == 6:
+        p[0] = ArrayDeclaration(p[1][0], p[1][1], p[2], p[4], None)
+    else:
+        p[0] = ArrayDeclaration(p[1][0], p[1][1], p[2], p[4], p[8])
 
 def p_codeblock(p):
     """
@@ -168,7 +200,7 @@ def p_separator(p):
 def p_datatype(p):
     """
     datatype : primary_type
-             | type_modificator primary_type
+             | type_modifier primary_type
     """
     p[0] = [None, p[1]] if len(p) == 2 else [p[1], p[2]]
 
@@ -178,14 +210,27 @@ def p_primary_type(p):
                  | WORD_T
                  | DWORD_T
                  | QWORD_T
+                 | FLOAT_T
+                 | DOUBLE_T
+                 | UBYTE_T
+                 | UWORD_T
+                 | UDWORD_T
+                 | UQWORD_T
     """
     p[0] = p[1]
 
-def p_type_modificator(p):
+def p_type_modifier(p):
     """
-    type_modificator : CONST_T
+    type_modifier : CONST_T
     """
     p[0] = p[1]
+
+def p_expression_list(p):
+    """
+    expression_list : expression
+                    | expression COMMA expression_list
+    """
+    p[0] = [p[1]] if len(p) == 2 else [p[1]] + p[3]
 
 def p_error(p):
     if p:

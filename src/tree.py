@@ -12,6 +12,14 @@ class VariableAccess:
     def __repr__(self):
         return f"<VariableAccess: {self.name}>"
 
+class ArrayAccess:
+    def __init__(self, name, index):
+        self.name = name
+        self.index = index
+
+    def __repr__(self):
+        return f"ArrayAccess: {self.name}, {self.index}"
+
 class UnaryOp:
     def __init__(self, operator, right):
         self.operator = operator
@@ -38,6 +46,16 @@ class VariableAssignment:
     def __repr__(self):
         return f"<VariableAssignment: {self.name}, {self.operator}, {self.value}>"
 
+class ArrayAssignment:
+    def __init__(self, name, index, operator, value):
+        self.name = name
+        self.index = index
+        self.operator = operator
+        self.value = value
+
+    def __repr__(self):
+        return f"<ArrayAssignment: {self.name}, {self.operator}, {self.value}>"
+
 class Group:
     def __init__(self, group):
         self.group = group
@@ -54,6 +72,17 @@ class VariableDeclaration:
 
     def __repr__(self):
         return f"<VariableDeclaration: {self.type_modifier}, {self.primary_type}, {self.name}, {self.value}>"
+
+class ArrayDeclaration:
+    def __init__(self, type_modifier, primary_type, name, size, content):
+        self.type_modifier = type_modifier
+        self.primary_type = primary_type
+        self.name = name
+        self.size = size
+        self.content = content
+
+    def __repr__(self):
+        return f"<ArrayDeclaration: {self.type_modifier}, {self.primary_type}, {self.name}, {self.size}, {self.content}>"
 
 class CodeBlock:
     def __init__(self, statement_list):

@@ -5,7 +5,13 @@ keywords = {
     'word': 'WORD_T',
     'dword': 'DWORD_T',
     'qword': 'QWORD_T',
+    'float': 'FLOAT_T',
+    'double': 'DOUBLE_T',
     'const': 'CONST_T',
+    'ubyte': 'UBYTE_T',
+    'uword': 'UWORD_T',
+    'udword': 'UDWORD_T',
+    'uqword': 'UQWORD_T',
     'if': 'IF',
     'else': 'ELSE',
     'forever': 'FOREVER',
@@ -20,7 +26,7 @@ tokens = (
     'COMMENT',
     'NUMBER', 'ID',
     'PLUS', 'MINUS', 'STAR', 'SLASH', 'LSHIFT', 'RSHIFT',
-    'LPAR', 'RPAR', 'SEMI', 'LBRACE', 'RBRACE',
+    'LPAR', 'RPAR', 'SEMI', 'LBRACE', 'RBRACE', 'LSQB', 'RSQB', 'COMMA',
     'EQUAL', 'PLUSEQ', 'MINUSEQ', 'STAREQ', 'SLASHEQ', 'ANDEQ', 'OREQ', 'XOREQ', 'NOTEQ', 'LSHIFTEQ', 'RSHIFTEQ',
     'BITAND', 'BITOR', 'XOR', 'BITNOT',
     'EQEQUAL', 'NOTEQUAL', 'LESS', 'GREAT', 'LESSEQ', 'GREATEQ'
@@ -50,6 +56,9 @@ t_RPAR = r'\)'
 t_SEMI = r';'
 t_LBRACE = r'\{'
 t_RBRACE = r'\}'
+t_LSQB = r'\['
+t_RSQB = r'\]'
+t_COMMA = r','
 
 t_EQUAL = r'='
 t_PLUSEQ = r'\+='

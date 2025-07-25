@@ -15,17 +15,26 @@ class SymbolTable:
             raise KeyError(f"Variable '{name}' not found.")
         return self.content[name]
 
+    def get_size(self, name) -> int:
+        if name not in self.content:
+            raise KeyError(f"Variable '{name}' not found")
+        var = self.content[name]
+        if not hasattr(var, 'size'):
+            raise AttributeError(f"Variable '{name}' has no size attribute")
+        return var.size
+
     def __repr__(self):
         return "Symbol table:\n" + "\n".join(
             [str(v) for v in self.content.values()]
         )
 
 class Variable:
-    def __init__(self, datatype, name, value, is_const: bool):
+    def __init__(self, datatype, name, value, is_const: bool, size=None):
         self.datatype = datatype
         self.name = name
         self.value = value
         self.is_const = is_const
+        self.size = size
 
     def __repr__(self):
-        return f"Variable {self.name} of type {self.datatype} = {self.value} and is_const = {self.is_const}"
+        return f"Variable {self.name} of type {self.datatype} and size (if array) {self.size} = {self.value} and is_const = {self.is_const}"
