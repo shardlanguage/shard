@@ -4,6 +4,7 @@
 *Shard* is a compiled programming language in active development.
 
 ## Features
+- Functions and procedures (main function required)
 - Static arrays (a[size] = [e1, e2, e3, e4])
 - Unsigned types (ubte, uword, udword, uqword)
 - Comments (#)
@@ -45,25 +46,30 @@ If you want to contribute, please read [the contributing guide](CONTRIBUTING.md)
 ***IMPORTANT: Shard requires GCC to compile***
 
 ```bash
-shardc -h                       # Display a help message
-shardc -c example.shd           # Compile a Shard file into a C file
-shardc -o example.shd           # Compile a Shard file into an object file
-shardc -x example.shd           # Compile a Shard file into an executable file
+shardc -h                               # Display a help message
+shardc -c example.shd                   # Compile a Shard file into a C file
+shardc -o example.shd                   # Compile a C file into an object file
+shardc -x example.shd                   # Compile an object file into an executable file
+shard -cox example.shd                  # All-in one -c -o and -x options
+shard -cox --keep-all example.shd       # Don't remove the generated files (.c and .o)
 ```
 
 ## Program example
 You can try to compile and run the program below:
 ```shd
 # My first Shard program
+# NOTE: as you can see, the last statement of a program or a code block does
+# not require a ;
 
-dword x = 0;
-const dword y = 79;
-
-# Same than while x < y
-#
-# ; is not required after the last statement of a code block or a program
-until x == y
+func dword add(dword a, dword b)
 {
-    x += 1
+    return a + b
+};
+
+func dword main()
+{
+    add(a, b);
+
+    return 0
 }
 ```

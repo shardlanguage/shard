@@ -4,5 +4,8 @@ build/
 dist/
 test/
 src/__pycache__/
+src/parser_out/
+src/parser.out
+src/parsetab.py
 src/utils/__pycache__/
 shardc.spec
