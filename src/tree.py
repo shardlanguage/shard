@@ -31,6 +31,15 @@ class ArrayAccess:
     def __repr__(self):
         return f"ArrayAccess: {self.name}, {self.index}"
 
+# Access to field <field> of structure instance <instance>
+class StructInstanceFieldAccess:
+    def __init__(self, instance, field):
+        self.instance = instance
+        self.field = field
+
+    def __repr__(self):
+        return f"<StructInstanceFieldAccess: {self.instance}, {self.field}>"
+
 # Call function <name> with parameters <parameters>
 class FunctionCall:
     def __init__(self, name, parameters):
@@ -79,6 +88,18 @@ class ArrayAssignment:
 
     def __repr__(self):
         return f"<ArrayAssignment: {self.name}, {self.operator}, {self.value}>"
+
+# Assign <value> to field <field> of structure instance <instance> using assignment operator
+# <operator>
+class StructInstanceFieldAssignment:
+    def __init__(self, instance, field, operator, value):
+        self.instance = instance
+        self.field = field
+        self.operator = operator
+        self.value = value
+
+    def __repr__(self):
+        return f"<StructInstanceFieldAssignment: {self.instance}, {self.operator}, {self.value}>"
 
 # (group)
 class Group:
@@ -166,3 +187,12 @@ class FunctionDefinition:
 
     def __repr__(self):
         return f"<FunctionDefinition: {self.datatype}, {self.name}, {self.parameters}, {self.body}>"
+
+# Define structure <name> with fields <fields>
+class StructureDefinition:
+    def __init__(self, name, fields):
+        self.name = name
+        self.fields = fields
+
+    def __repr__(self):
+        return f"<StrcutureDefinition: {self.name}, {self.fields}>"

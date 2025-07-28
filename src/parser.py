@@ -72,6 +72,7 @@ def p_statement(p):
               | loop
               | flow_control
               | function_definition
+              | struct_definition
     """
     p[0] = p[1]
 
@@ -104,6 +105,13 @@ def p_expression_array_access(p):
     expression : ID LSQB expression RSQB
     """
     p[0] = ArrayAccess(p[1], p[3])
+
+# id.id
+def p_expression_struct_field_access(p):
+    """
+    expression : ID DOT ID
+    """
+    p[0] = StructInstanceFieldAccess(p[1], p[3])
 
 # id(param1, param2, ...)
 # id()
@@ -194,6 +202,25 @@ def p_expression_array_assignment(p):
                | ID LSQB expression RSQB RSHIFTEQ expression
     """
     p[0] = ArrayAssignment(p[1], p[3], p[5], p[6])
+
+# id.id = y | id.id += y | id.id -= y | id.id *= y | id.id /= y
+# id.id &= y | id.id |= y | id.id ^= y | id.id ~= y | id.id <<= y
+# id.id >>= y
+def p_expression_struct_instance_field_assignment(p):
+    """
+    expression : ID DOT ID EQUAL expression
+               | ID DOT ID PLUSEQ expression
+               | ID DOT ID MINUSEQ expression
+               | ID DOT ID STAREQ expression
+               | ID DOT ID SLASHEQ expression
+               | ID DOT ID ANDEQ expression
+               | ID DOT ID OREQ expression
+               | ID DOT ID XOREQ expression
+               | ID DOT ID NOTEQ expression
+               | ID DOT ID LSHIFTEQ expression
+               | ID DOT ID RSHIFTEQ expression
+    """
+    p[0] = StructInstanceFieldAssignment(p[1], p[3], p[4], p[5])
 
 # (x)
 def p_expression_group(p):
@@ -289,6 +316,13 @@ def p_function_definition(p):
     else:
         p[0] = FunctionDefinition(p[2], p[3], p[5], p[7])
 
+# struct id {}
+def p_struct_definition(p):
+    """
+    struct_definition : STRUCT ID LBRACE parameter_list RBRACE
+    """
+    p[0] = StructureDefinition(p[2], p[4])
+
 # ;
 def p_separator(p):
     """
@@ -320,8 +354,12 @@ def p_primary_type(p):
                  | UDWORD_T
                  | UQWORD_T
                  | VOID_T
+                 | STRUCT ID
     """
-    p[0] = p[1]
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = p[2]
 
 # const
 def p_type_modifier(p):
@@ -353,7 +391,7 @@ def p_parameter_declare(p):
     """
     parameter_declare : datatype ID
     """
-    p[0] = (p[1][1], p[2])
+    p[0] = (p[1], p[2])
 
 # Handle syntax errors
 def p_error(p):

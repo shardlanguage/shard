@@ -4,6 +4,7 @@
 *Shard* is a compiled programming language in active development.
 
 ## Features
+- Structures
 - Functions and procedures (main function required)
 - Static arrays (a[size] = [e1, e2, e3, e4])
 - Unsigned types (ubte, uword, udword, uqword)
@@ -61,14 +62,29 @@ You can try to compile and run the program below:
 # NOTE: as you can see, the last statement of a program or a code block does
 # not require a ;
 
+# Define a function to add 2 numbers and return the result
+# NOTE: dword handles 32-bit signed values
 func dword add(dword a, dword b)
 {
     return a + b
 };
 
+# Main function
 func dword main()
 {
-    add(a, b);
+    # Define a structure to represent a point with a xy position
+    struct Point
+    {
+        dword x,
+        dword y
+    };
+
+    # Declare an instance of this point
+    struct Point p;
+
+    # Add the x position and the y position of the point and store
+    # the result in the pos variable
+    dword pos = add(p.x, p.y);
 
     return 0
 }

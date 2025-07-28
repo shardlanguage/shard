@@ -12,6 +12,7 @@ class SymbolTable:
     def __init__(self, parent=None):
         self.variables = {}
         self.functions = {}
+        self.structures = {}
         self.parent = parent
 
     # Find a variable in the variables table
@@ -59,10 +60,30 @@ class SymbolTable:
         else:
             raise KeyError(f"Function '{name}' not found.")
 
+    # Find a structure in the structures table
+    def find_structure(self, name) -> bool:
+        return name in self.structures or (self.parent and self.parent.find_structure(name))
+
+    # Add a structure to the structures table
+    def add_structure(self, structure: 'Structure'):
+        if structure.name in self.structures:
+            raise ValueError(f"Structure '{structure.name} already defined.'")
+        self.structures[structure.name] = structure
+
+    # Get a structure from the structures table
+    def get_structure(self, name) -> 'Structure':
+        if name in self.structures:
+            return self.structures[name]
+        elif self.parent:
+            return self.parent.get_structure(name)
+        else:
+            raise KeyError(f"Structure '{name}' not found.")
+
     def __repr__(self):
         lines = ["Symbol Table:"]
-        lines += [f"  Variable {v}" for v in self.variables.values()]
-        lines += [f"  Function {f}" for f in self.functions.values()]
+        lines += [f"    Variable {v}" for v in self.variables.values()]
+        lines += [f"    Function {f}" for f in self.functions.values()]
+        lines += [f"    Structure {s}" for s in self.structures.values()]
         return "\n".join(lines)
 
 # A variable
@@ -87,3 +108,12 @@ class Function:
 
     def __repr__(self):
         return f"Function {self.name} of type {self.return_type} with parameters {self.parameters} and body {self.body}"
+
+# A structure
+class Structure:
+    def __init__(self, name, fields):
+        self.name = name
+        self.fields = fields
+
+    def __repr__(self):
+        return f"Structure {self.name} with fields {self.fields}"

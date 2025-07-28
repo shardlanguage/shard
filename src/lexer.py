@@ -35,7 +35,8 @@ keywords = {
     'break': 'BREAK',
     'continue': 'CONTINUE',
     'func': 'FUNC',
-    'return': 'RETURN'
+    'return': 'RETURN',
+    'struct': 'STRUCT'
 }
 
 # Tokens tuple
@@ -43,7 +44,7 @@ tokens = (
     'COMMENT',
     'NUMBER', 'ID',
     'PLUS', 'MINUS', 'STAR', 'SLASH', 'LSHIFT', 'RSHIFT',
-    'LPAR', 'RPAR', 'SEMI', 'LBRACE', 'RBRACE', 'LSQB', 'RSQB', 'COMMA',
+    'LPAR', 'RPAR', 'SEMI', 'LBRACE', 'RBRACE', 'LSQB', 'RSQB', 'COMMA', 'DOT',
     'EQUAL', 'PLUSEQ', 'MINUSEQ', 'STAREQ', 'SLASHEQ', 'ANDEQ', 'OREQ', 'XOREQ', 'NOTEQ', 'LSHIFTEQ', 'RSHIFTEQ',
     'BITAND', 'BITOR', 'XOR', 'BITNOT',
     'EQEQUAL', 'NOTEQUAL', 'LESS', 'GREAT', 'LESSEQ', 'GREATEQ'
@@ -82,6 +83,7 @@ t_RBRACE = r'\}'
 t_LSQB = r'\['
 t_RSQB = r'\]'
 t_COMMA = r','
+t_DOT = '\.'
 
 # Regular expressions for assignment operators
 t_EQUAL = r'='

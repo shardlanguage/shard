@@ -36,13 +36,13 @@ def compile_to_c(inputf):
             content = f.read()
 
         if content:
-            try:
-                env = Environment()
-                ast = parser.parse(content)
-                result = env.compile_ast(ast)
-            except Exception as e:
-                print(f"ERROR: {e}")
-                sys.exit(1)
+            #try:
+            env = Environment()
+            ast = parser.parse(content)
+            result = env.compile_ast(ast)
+            #except Exception as e:
+            #    print(f"ERROR: {e}")
+            #    sys.exit(1)
 
             outputf = replace_extension(inputf, "c")
 

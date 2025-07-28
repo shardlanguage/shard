@@ -11,6 +11,7 @@
 from tree import *
 from utils.symbols import *
 from utils.codegen import *
+from utils.conversion import type_map
 
 # Environment class
 class Environment:
@@ -21,6 +22,8 @@ class Environment:
 
     # Evaluate <node> node
     def evaluate(self, node):
+        global type_map
+
         if isinstance(node, Value):
             return generate_value(node.value)
 
@@ -28,7 +31,7 @@ class Environment:
             if self.symbol_table.find_variable(node.name):
                 return generate_id(node.name)
             else:
-                raise NameError(f"Cannot access to undeclared variable \"{node.name}\"")
+                raise NameError(f"Cannot access to undeclarated variable \"{node.name}\"")
 
         elif isinstance(node, ArrayAccess):
             if self.symbol_table.find_variable(node.name):
@@ -38,14 +41,20 @@ class Environment:
                     raise IndexError("Array index out of range")
                 return generate_array_access(node.name, index)
             else:
-                raise NameError(f"Cannot access to undeclared array \"{node.name}\"")
+                raise NameError(f"Cannot access to undeclarated array \"{node.name}\"")
+
+        elif isinstance(node, StructInstanceFieldAccess):
+            if self.symbol_table.find_variable(node.instance):
+                return generate_struct_instance_field_access(node.instance, node.field)
+            else:
+                raise NameError(f"Cannot access to undeclarated variable \"{node.instance}\"")
 
         elif isinstance(node, FunctionCall):
             if self.symbol_table.find_function(node.name):
                 args = [self.evaluate(param) for param in node.parameters]
                 return generate_function_call(node.name, args)
             else:
-                raise NameError(f"Call to undeclared function \"{node.name}\"")
+                raise NameError(f"Call to undeclarated function \"{node.name}\"")
 
         elif isinstance(node, UnaryOp):
             right = self.evaluate(node.right)
@@ -61,7 +70,7 @@ class Environment:
                 value = self.evaluate(node.value)
                 return generate_AssignOp(self.symbol_table, node.name, node.operator, value)
             else:
-                raise NameError(f"Assignment operation on undeclared variable \"{node.name}\"")
+                raise NameError(f"Assignment operation on undeclarated variable \"{node.name}\"")
 
         elif isinstance(node, ArrayAssignment):
             if self.symbol_table.find_variable(node.name):
@@ -72,7 +81,12 @@ class Environment:
                     raise IndexError("Array index out of range")
                 return generate_ArrayAssignOp(self.symbol_table, node.name, index, node.operator, value)
             else:
-                raise NameError(f"Assignment operation on undeclared array \"{node.name}\"")
+                raise NameError(f"Assignment operation on undeclarated array \"{node.name}\"")
+
+        elif isinstance(node, StructInstanceFieldAssignment):
+            if self.symbol_table.find_variable(node.instance):
+                value = self.evaluate(node.value)
+                return generate_StructInstanceFieldAssignOp(self.symbol_table, node.instance, node.field, node.operator, value)
 
         elif isinstance(node, Group):
             group = self.evaluate(node.group)
@@ -86,7 +100,7 @@ class Environment:
                 is_const = (node.type_modifier == "const") if node.type_modifier else False
                 var = Variable(node.primary_type, node.name, value, is_const)
                 self.symbol_table.add_variable(var)
-                return generate_variable_declaration(self.symbol_table, node.type_modifier, node.primary_type, node.name, value)
+                return generate_variable_declaration(node.type_modifier, node.primary_type, node.name, value)
             else:
                 raise NameError(f"Redeclaration of variable \"{node.name}\"")
 
@@ -98,11 +112,11 @@ class Environment:
                     for value_node in node.content:
                         content.append(self.evaluate(value_node))
                 if len(content) > int(size):
-                    raise IndexError(f"Array content exceeds declared size")
+                    raise IndexError(f"Array content exceeds declarated size")
                 is_const = (node.type_modifier == "const") if node.type_modifier else False
                 var = Variable(node.primary_type, node.name, size, is_const)
                 self.symbol_table.add_variable(var)
-                return generate_array_declaration(self.symbol_table, node.type_modifier, node.primary_type, node.name, size, content)
+                return generate_array_declaration(node.type_modifier, node.primary_type, node.name, size, content)
             else:
                 raise NameError(f"Redeclaration of array \"{node.name}\"")
 
@@ -141,29 +155,47 @@ class Environment:
             local_env = Environment()
             local_env.symbol_table = SymbolTable(parent=self.symbol_table)
 
-            type_map = {
-                'byte': 'int8_t', 'ubyte': 'uint8_t',
-                'word': 'int16_t', 'uword': 'uint16_t',
-                'dword': 'int32_t', 'udword': 'uint32_t',
-                'qword': 'int64_t', 'uqword': 'uint64_t',
-                'float': 'float', 'double': 'double'
-            }
-
             param_decls = []
-            for type_, name in node.parameters:
-                var = Variable(type_, name, None, False)
+            for datatype, name in node.parameters:
+                modifier, primary_type = None, None
+                if isinstance(datatype, (list, tuple)):
+                    if len(datatype) == 2:
+                        modifier, primary_type = datatype
+                    else:
+                        primary_type = datatype[0]
+                else:
+                    primary_type = datatype
+
+                var = Variable(datatype, name, None, False)
                 local_env.symbol_table.add_variable(var)
 
-                if type_ not in type_map:
-                    raise ValueError(f"Unknown type {type_} for parameter {name}")
+                if primary_type not in type_map:
+                    raise ValueError(f"Unknown type {primary_type} for parameter {name}")
 
-                param_decls.append(f"{type_map[type_]} {name}")
+                type_str = ''
+                if modifier == 'const':
+                    type_str += 'const '
+
+                type_str += type_map[primary_type]
+
+                param_decls.append(f"{type_str} {name}")
 
             body_stmts = [local_env.evaluate(stmt) for stmt in node.body.statement_list]
 
             fn_code = generate_function_definition(node.datatype, node.name, param_decls, body_stmts)
             self.generated_functions.append(fn_code)
             return ""
+
+        elif isinstance(node, StructureDefinition):
+            if self.symbol_table.find_structure(node.name):
+                raise NameError(f"Structure \"{node.name}\" already defined")
+
+            type_map[node.name] = f"struct {node.name}"
+
+            struct = Structure(node.name, node.fields)
+            self.symbol_table.add_structure(struct)
+
+            return generate_struct_definition(node.name, node.fields)
 
         else:
             raise RuntimeError(f"Unknown node type \"{type(node)}\"")

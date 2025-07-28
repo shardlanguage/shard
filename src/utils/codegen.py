@@ -8,6 +8,7 @@
 
 # Import modules
 from utils.symbols import *
+from utils.conversion import *
 
 # Generate a value
 def generate_value(value):
@@ -20,6 +21,10 @@ def generate_id(name):
 # Generate an access to an array index
 def generate_array_access(name, index):
     return f"{name}[{index}]"
+
+# Generate an access to a structure instance field
+def generate_struct_instance_field_access(instance, field):
+    return f"{instance}.{field}"
 
 # Generate a call to a function
 def generate_function_call(name, parameters):
@@ -41,66 +46,32 @@ def generate_assignment(name, operator, value):
 def generate_array_assignment(name, index, operator, value):
     return f"{name}[{index}] {operator} {value}"
 
+# Generate an assignment to a structure instance field
+def generate_struct_instance_field_assignment(instance, field, operator, value):
+    return f"{instance}.{field} {operator} {value}"
+
 # Generate a groupped expression
 def generate_group(group):
     return f"({group})"
 
 # Generate a variable declaration
-def generate_variable_declaration(symbol_table, type_modifier, primary_type, name, value):
+def generate_variable_declaration(type_modifier, primary_type, name, value):
     prefix = "const " if type_modifier == "const" else ""
-    
-    if primary_type == 'byte':
-        c_type = "int8_t"
-    elif primary_type == 'word':
-        c_type = "int16_t"
-    elif primary_type == 'dword':
-        c_type = "int32_t"
-    elif primary_type == 'qword':
-        c_type = "int64_t"
-    elif primary_type == 'float':
-        c_type = "float"
-    elif primary_type == 'double':
-        c_type = "double"
-    elif primary_type == 'ubyte':
-        c_type = "uint8_t"
-    elif primary_type == 'uword':
-        c_type = "uint16_t"
-    elif primary_type == 'udword':
-        c_type = "uint32_t"
-    elif primary_type == 'uqword':
-        c_type = "uint64_t"
-    else:
-        raise ValueError(f"Unknown primary type: {primary_type}")
 
+    c_type = shard_type_to_c(primary_type)
+
+    if c_type.startswith("struct"):
+        return f"{prefix}{c_type} {name} = " + '{' + '0' + '}'
     return f"{prefix}{c_type} {name} = {value}"
 
 # Generate an array declaration
-def generate_array_declaration(symbol_table, type_modifier, primary_type, name, size, content):
+def generate_array_declaration(type_modifier, primary_type, name, size, content):
     prefix = "const " if type_modifier == "const" else ""
     content_str = '{' + ', '.join(content) + '}'
     
-    if primary_type == 'byte':
-        c_type = "int8_t"
-    elif primary_type == 'word':
-        c_type = "int16_t"
-    elif primary_type == 'dword':
-        c_type = "int32_t"
-    elif primary_type == 'qword':
-        c_type = "int64_t"
-    elif primary_type == 'float':
-        c_type = "float"
-    elif primary_type == 'double':
-        c_type = "double"
-    elif primary_type == 'ubyte':
-        c_type = "uint8_t"
-    elif primary_type == 'uword':
-        c_type = "uint16_t"
-    elif primary_type == 'udword':
-        c_type = "uint32_t"
-    elif primary_type == 'uqword':
-        c_type = "uint64_t"
-    else:
-        raise ValueError(f"Unknown primary type: {primary_type}")
+    c_type = shard_type_to_c(primary_type)
+    if c_type.startswith("struct"):
+        raise TypeError("A structure instance cannot be declarated as an array")
     
     return f"{prefix}{c_type} {name}[{size}] = {content_str}"
 
@@ -152,16 +123,9 @@ def generate_flow_control(statement, value):
 
 # Generate a function definition
 def generate_function_definition(datatype, name, parameters, body):
-    body_content = [f"    {stmt};\n" for stmt in body]
+    global type_map
 
-    type_map = {
-        'byte': 'int8_t', 'ubyte': 'uint8_t',
-        'word': 'int16_t', 'uword': 'uint16_t',
-        'dword': 'int32_t', 'udword': 'uint32_t',
-        'qword': 'int64_t', 'uqword': 'uint64_t',
-        'float': 'float', 'double': 'double',
-        'void': 'void'
-    }
+    body_content = [f"    {stmt};\n" for stmt in body]
 
     modifier, primary_type = datatype
 
@@ -173,9 +137,34 @@ def generate_function_definition(datatype, name, parameters, body):
         raise ValueError(f"Invalid type: {primary_type}")
 
     type_str += type_map[primary_type]
+    if type_str.startswith("struct"):
+        raise TypeError("A function cannot be a structure instance")
+
     params_str = ', '.join(parameters) if parameters else ''
 
     return f"{type_str} {name}({params_str}) " + '{\n' + ''.join(body_content) + '}\n'
+
+# Generate a structure definition
+def generate_struct_definition(name, fields):
+    global type_map
+
+    lines = []
+    for field in fields:
+        datatype, var = field
+        modifier, base_type = datatype
+        
+        c_type = ''
+        if modifier == 'const':
+            c_type += 'const '
+
+        if base_type not in type_map:
+            raise ValueError(f"Unknown type: {base_type}")
+
+        c_type += type_map[base_type]
+        lines.append(f"{c_type} {var}")
+
+    fields_str = ';\n\t'.join(lines) + ';' if lines else ''
+    return f"struct {name} {{\n\t{fields_str}\n}}"
 
 # Generate any unary operation
 def generate_UnOp(operator, right):
@@ -206,7 +195,7 @@ def generate_BinOp(left, operator, right):
 def generate_AssignOp(symbol_table, name, operator, value):
     op_map = {
         '=': '=', '+=': '+=', '-=': '-=', '*=': '*=', '/=': '/=',
-        '&=': '&=', '|=': '|=', '^=': '^=', '~=': '~=',
+        '&=': '&=', '|=': '|=', '^=': '^=', '~=': '= ~',
         '<<=': '<<=', '>>=': '>>='
     }
 
@@ -220,7 +209,7 @@ def generate_AssignOp(symbol_table, name, operator, value):
 def generate_ArrayAssignOp(symbol_table, name, index, operator, value):
     op_map = {
         '=': '=', '+=': '+=', '-=': '-=', '*=': '*=', '/=': '/=',
-        '&=': '&=', '|=': '|=', '^=': '^=', '~=': '~=',
+        '&=': '&=', '|=': '|=', '^=': '^=', '~=': '= ~',
         '<<=': '<<=', '>>=': '>>='
     }
 
@@ -229,6 +218,20 @@ def generate_ArrayAssignOp(symbol_table, name, index, operator, value):
     if operator not in op_map:
         raise ValueError(f"Unknow assignment operator: {operator}")
     return generate_array_assignment(name, index, op_map[operator], value)
+
+# Generate any structure instance field assignment operation
+def generate_StructInstanceFieldAssignOp(symbol_table, instance, field, operator, value):
+    op_map = {
+        '=': '=', '+=': '+=', '-=': '-=', '*=': '*=', '/=': '/=',
+        '&=': '&=', '|=': '|=', '^=': '^=', '~=': '= ~',
+        '<<=': '<<=', '>>=': '>>='
+    }
+
+    var = symbol_table.get_variable(instance)
+
+    if operator not in op_map:
+        raise ValueError(f"Unknow assignment operator: {operator}")
+    return generate_struct_instance_field_assignment(instance, field, operator, value)
 
 # Generate any conditionnal loop structure
 def generate_LoopCondition(looptype, condition, branch):
