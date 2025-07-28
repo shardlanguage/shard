@@ -92,6 +92,13 @@ def p_expression_value(p):
     """
     p[0] = Value(p[1])
 
+# "this is a string"
+def p_expression_string(p):
+    """
+    expression : STRING
+    """
+    p[0] = String(p[1])
+
 # id
 def p_expression_variable_access(p):
     """
@@ -347,6 +354,7 @@ def p_primary_type(p):
                  | WORD_T
                  | DWORD_T
                  | QWORD_T
+                 | STRING_T
                  | FLOAT_T
                  | DOUBLE_T
                  | UBYTE_T

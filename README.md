@@ -4,6 +4,7 @@
 *Shard* is a compiled programming language in active development.
 
 ## Features
+- Strings
 - Structures
 - Functions and procedures (main function required)
 - Static arrays (a[size] = [e1, e2, e3, e4])
@@ -75,12 +76,15 @@ func dword main()
     # Define a structure to represent a point with a xy position
     struct Point
     {
+        string name,
         dword x,
         dword y
     };
 
     # Declare an instance of this point
     struct Point p;
+    # Give the point a name
+    p.name = "A";
 
     # Add the x position and the y position of the point and store
     # the result in the pos variable

@@ -27,6 +27,9 @@ class Environment:
         if isinstance(node, Value):
             return generate_value(node.value)
 
+        elif isinstance(node, String):
+            return generate_string(node.string)
+
         elif isinstance(node, VariableAccess):
             if self.symbol_table.find_variable(node.name):
                 return generate_id(node.name)

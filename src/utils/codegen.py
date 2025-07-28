@@ -14,6 +14,9 @@ from utils.conversion import *
 def generate_value(value):
     return f"{value}"
 
+def generate_string(string):
+    return f"\"{string}\""
+
 # Generate an access to a variable
 def generate_id(name):
     return f"{name}"

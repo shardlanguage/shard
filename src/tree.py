@@ -14,6 +14,14 @@ class Value:
     def __repr__(self):
         return f"<Value: {self.value}>"
 
+# String <string>
+class String:
+    def __init__(self, string):
+        self.string = string
+
+    def __repr__(self):
+        return f"<String: {self.string}>"
+
 # Access to variable <name>
 class VariableAccess:
     def __init__(self, name):

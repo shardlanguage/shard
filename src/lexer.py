@@ -16,6 +16,7 @@ keywords = {
     'word': 'WORD_T',
     'dword': 'DWORD_T',
     'qword': 'QWORD_T',
+    'string': 'STRING_T',
     'float': 'FLOAT_T',
     'double': 'DOUBLE_T',
     'const': 'CONST_T',
@@ -42,7 +43,7 @@ keywords = {
 # Tokens tuple
 tokens = (
     'COMMENT',
-    'NUMBER', 'ID',
+    'NUMBER', 'ID', 'STRING',
     'PLUS', 'MINUS', 'STAR', 'SLASH', 'LSHIFT', 'RSHIFT',
     'LPAR', 'RPAR', 'SEMI', 'LBRACE', 'RBRACE', 'LSQB', 'RSQB', 'COMMA', 'DOT',
     'EQUAL', 'PLUSEQ', 'MINUSEQ', 'STAREQ', 'SLASHEQ', 'ANDEQ', 'OREQ', 'XOREQ', 'NOTEQ', 'LSHIFTEQ', 'RSHIFTEQ',
@@ -64,6 +65,12 @@ t_NUMBER = r'\d+(\.\d+)?'
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
     t.type = keywords.get(t.value, 'ID')
+    return t
+
+# Remove "" and handle escapes
+def t_STRING(t):
+    r'"([^"\\]|\\.)*"'
+    t.value = bytes(t.value[1:-1], "utf-8").decode("unicode_escape")
     return t
 
 # Regular expressions for arithmetic and bit-shifting operators

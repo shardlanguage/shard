@@ -12,7 +12,7 @@ type_map = {
     'dword': 'int32_t', 'udword': 'uint32_t',
     'qword': 'int64_t', 'uqword': 'uint64_t',
     'float': 'float', 'double': 'double',
-    'void': 'void'
+    'void': 'void', 'string': 'char*'
 }
 
 # Convert a Shard type to a C type
