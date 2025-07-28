@@ -146,24 +146,17 @@ def generate_function_definition(datatype, name, parameters, body):
 
 # Generate a structure definition
 def generate_struct_definition(name, fields):
-    global type_map
-
     lines = []
-    for field in fields:
-        datatype, var = field
-        modifier, base_type = datatype
-        
-        c_type = ''
-        if modifier == 'const':
-            c_type += 'const '
+    for datatype, var_name, *rest in fields:
+        size = rest[0] if rest else None
 
-        if base_type not in type_map:
-            raise ValueError(f"Unknown type: {base_type}")
+        if size is not None:
+            lines.append(f"{datatype} {var_name}[{size}];")
+        else:
+            lines.append(f"{datatype} {var_name};")
 
-        c_type += type_map[base_type]
-        lines.append(f"{c_type} {var}")
+    fields_str = '\n\t'.join(lines) if lines else ''
 
-    fields_str = ';\n\t'.join(lines) + ';' if lines else ''
     return f"struct {name} {{\n\t{fields_str}\n}}"
 
 # Generate any unary operation

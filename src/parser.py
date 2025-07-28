@@ -387,11 +387,16 @@ def p_parameter_list(p):
     p[0] = [p[1]] if len(p) == 2 else [p[1]] + p[3]
 
 # type id
+# type id[size]
 def p_parameter_declare(p):
     """
     parameter_declare : datatype ID
+                      | datatype ID LSQB expression RSQB
     """
-    p[0] = (p[1], p[2])
+    if len(p) == 3:
+        p[0] = (p[1], p[2])
+    else:
+        p[0] = (p[1], p[2], p[4])
 
 # Handle syntax errors
 def p_error(p):

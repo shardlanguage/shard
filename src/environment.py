@@ -156,18 +156,20 @@ class Environment:
             local_env.symbol_table = SymbolTable(parent=self.symbol_table)
 
             param_decls = []
-            for datatype, name in node.parameters:
-                modifier, primary_type = None, None
-                if isinstance(datatype, (list, tuple)):
-                    if len(datatype) == 2:
-                        modifier, primary_type = datatype
-                    else:
-                        primary_type = datatype[0]
+            for param in node.parameters:
+                if len(param) == 2:
+                    datatype, name = param
+                    size = None
+                elif len(param) == 3:
+                    datatype, name, size = param
                 else:
-                    primary_type = datatype
+                    raise ValueError(f"Invalid parameter declaration: {param}")
 
-                var = Variable(datatype, name, None, False)
-                local_env.symbol_table.add_variable(var)
+                if isinstance(datatype, (list, tuple)) and len(datatype) == 2:
+                    modifier, primary_type = datatype
+                else:
+                    modifier = None
+                    primary_type = datatype
 
                 if primary_type not in type_map:
                     raise ValueError(f"Unknown type {primary_type} for parameter {name}")
@@ -178,7 +180,14 @@ class Environment:
 
                 type_str += type_map[primary_type]
 
-                param_decls.append(f"{type_str} {name}")
+                evaluated_size = self.evaluate(size)
+                if evaluated_size is not None:
+                    param_decls.append(f"{type_str} {name}[{evaluated_size}]")
+                else:
+                    param_decls.append(f"{type_str} {name}")
+
+                var = Variable(datatype, name, None, False)
+                local_env.symbol_table.add_variable(var)
 
             body_stmts = [local_env.evaluate(stmt) for stmt in node.body.statement_list]
 
@@ -190,15 +199,40 @@ class Environment:
             if self.symbol_table.find_structure(node.name):
                 raise NameError(f"Structure \"{node.name}\" already defined")
 
+            processed_fields = []
+            for field in node.fields:
+                if len(field) == 2:
+                    datatype, var_name = field
+                    size = None
+                elif len(field) == 3:
+                    datatype, var_name, size = field
+                else:
+                    raise ValueError(f"Invalid field declaration: {field}")
+
+                if isinstance(datatype, (list, tuple)) and len(datatype) == 2:
+                    modifier, primary_type = datatype
+                else:
+                    modifier = None
+                    primary_type = datatype
+
+                if primary_type not in type_map:
+                    raise ValueError(f"Unknown type: {primary_type}")
+
+                type_str = ''
+                if modifier == 'const':
+                    type_str += 'const '
+                type_str += type_map[primary_type]
+
+                evaluated_size = self.evaluate(size)
+
+                processed_fields.append((type_str, var_name) if size is None else (type_str, var_name, evaluated_size))
+
             type_map[node.name] = f"struct {node.name}"
 
-            struct = Structure(node.name, node.fields)
+            struct = Structure(node.name, processed_fields)
             self.symbol_table.add_structure(struct)
 
-            return generate_struct_definition(node.name, node.fields)
-
-        else:
-            raise RuntimeError(f"Unknown node type \"{type(node)}\"")
+            return generate_struct_definition(node.name, processed_fields)
 
     # Compile an AST
     def compile_ast(self, ast):
