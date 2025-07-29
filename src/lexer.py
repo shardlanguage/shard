@@ -37,12 +37,13 @@ keywords = {
     'continue': 'CONTINUE',
     'func': 'FUNC',
     'return': 'RETURN',
-    'struct': 'STRUCT'
+    'struct': 'STRUCT',
+    'c': 'C',
 }
 
 # Tokens tuple
 tokens = (
-    'COMMENT',
+    'COMMENT', 'PP',
     'NUMBER', 'ID', 'STRING',
     'PLUS', 'MINUS', 'STAR', 'SLASH', 'LSHIFT', 'RSHIFT',
     'LPAR', 'RPAR', 'SEMI', 'LBRACE', 'RBRACE', 'LSQB', 'RSQB', 'COMMA', 'DOT',
@@ -57,6 +58,7 @@ tokens += tuple(keywords.values())
 # Ignore space, tabs and comments (lines starting with #)
 t_ignore = ' \t'
 t_ignore_COMMENT = r'\#.*'
+t_ignore_PP = r'%.*'
 
 # Regular expression for numbers, handling integers and floats
 t_NUMBER = r'\d+(\.\d+)?'
@@ -122,7 +124,7 @@ t_GREATEQ = r'>='
 # Rule to handle newlines
 def t_newline(t):
     r'\n+'
-    t.lineno += len(t.value)
+    t.lexer.lineno += len(t.value)
 
 # Handle illegal character errors
 #

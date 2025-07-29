@@ -204,3 +204,11 @@ class StructureDefinition:
 
     def __repr__(self):
         return f"<StrcutureDefinition: {self.name}, {self.fields}>"
+
+# Use inline C code: <code>
+class InlineC:
+    def __init__(self, code):
+        self.code = code
+
+    def __repr__(self):
+        return f"<InlineC: {self.code}>"

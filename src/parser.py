@@ -73,15 +73,18 @@ def p_statement(p):
               | flow_control
               | function_definition
               | struct_definition
+              | inline_c
     """
     p[0] = p[1]
 
 #
 # # this is a comment
+# %spp_instruction
 def p_empty(p):
     """
     empty :
           | COMMENT
+          | PP
     """
     pass
 
@@ -329,6 +332,13 @@ def p_struct_definition(p):
     struct_definition : STRUCT ID LBRACE parameter_list RBRACE
     """
     p[0] = StructureDefinition(p[2], p[4])
+
+# c { "code" }
+def p_c(p):
+    """
+    inline_c : C LBRACE STRING RBRACE
+    """
+    p[0] = InlineC(p[3])
 
 # ;
 def p_separator(p):

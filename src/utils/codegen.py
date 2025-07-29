@@ -10,12 +10,18 @@
 from utils.symbols import *
 from utils.conversion import *
 
+# Generate C code directly
+def generate_inline_c(code):
+    return f"{code}"
+
 # Generate a value
 def generate_value(value):
     return f"{value}"
 
+# Generate a string
 def generate_string(string):
-    return f"\"{string}\""
+    formatted_str = string.replace('\n', '\\\n')
+    return f"\"{formatted_str}\""
 
 # Generate an access to a variable
 def generate_id(name):

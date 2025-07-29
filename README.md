@@ -4,6 +4,8 @@
 *Shard* is a compiled programming language in active development.
 
 ## Features
+- Inline C
+- Preprocessor (%include)
 - Strings
 - Structures
 - Functions and procedures (main function required)
@@ -25,6 +27,8 @@
 - Statement lists
 
 ## Install
+---
+### Linux
 The shardc binary is provided in the releases but you can install from sources:
 ```bash
 git clone https://github.com/shardlanguage/shard
@@ -39,6 +43,16 @@ Try it out using:
 
 ```bash
 shardc -h
+```
+
+### Windows
+*WARNING: the Windows installation script has not been tried yet because I don't have a machine with Windows installed. If you have, you can run the script on your machine and open an issue to tell us if it works or not. Thanks!*
+
+```powershell
+git clone https://github.com/shardlanguage/shard.git
+cd shard
+# As administrator
+.\install.ps1
 ```
 
 ## Contributing
@@ -62,10 +76,12 @@ You can try to compile and run the program below:
 # My first Shard program
 # NOTE: as you can see, the last statement of a program or a code block does
 # not require a ;
+# But if you are making a module that will be included in another file using
+# %include, ; is required at the end of your module
 
 # Define a function to add 2 numbers and return the result
 # NOTE: dword handles 32-bit signed values
-func dword add(dword a, dword b)
+func dword add_pos(dword a, dword b)
 {
     return a + b
 };

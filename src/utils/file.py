@@ -13,6 +13,7 @@ import platform
 import shutil
 import sys
 
+from spp import SPP_Parser
 from parser import parser
 from environment import Environment
 
@@ -32,17 +33,25 @@ def replace_extension(filename, new_ext=None):
 # into a new file
 def compile_to_c(inputf):
     if os.path.exists(inputf):
-        with open(inputf, "r") as f:
+        input_path = os.path.abspath(inputf)
+        base_dir = os.path.dirname(input_path)
+
+        with open(input_path, "r") as f:
             content = f.read()
 
         if content:
-            #try:
+            spp_parser = SPP_Parser(content, base_dir)
+
+            code = spp_parser.process()
+
             env = Environment()
-            ast = parser.parse(content)
-            result = env.compile_ast(ast)
-            #except Exception as e:
-            #    print(f"ERROR: {e}")
-            #    sys.exit(1)
+            
+            try:
+                ast = parser.parse(code)
+                result = env.compile_ast(ast)
+            except Exception as e:
+                print(f"ERROR: {e}")
+                sys.exit(1)
 
             outputf = replace_extension(inputf, "c")
 
