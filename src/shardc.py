@@ -24,11 +24,12 @@ def main():
 
     parser.add_argument('input_file', help='Input .shd file')
     parser.add_argument('--keep-all', action="store_true", help="Don't remove C and object files when -cox is used")
+    parser.add_argument('--dbg-err', action="store_true", help="Display error traceback, only used for shardc features development")
 
     args = parser.parse_args()
 
     if args.mode == 'c':
-        compile_to_c(args.input_file)
+        compile_to_c(args.input_file, errdbg=True if args.dbg_err else False)
 
     elif args.mode == 'o':
         compile_c_to_object(args.input_file)

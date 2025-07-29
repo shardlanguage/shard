@@ -37,8 +37,6 @@ class SymbolTable:
     # Get the size of an array from the variables table
     def get_size(self, name) -> int:
         var = self.get_variable(name)
-        if var.size is None:
-            raise AttributeError(f"Variable '{name}' has no size (not an array?)")
         return var.size
 
     # Find a function in the functions table

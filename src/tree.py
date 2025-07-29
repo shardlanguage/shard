@@ -176,6 +176,17 @@ class LoopConditionnal:
     def __repr__(self):
         return f"<LoopConditionnal: {self.looptype}, {self.condition}, {self.branch}>"
 
+# For loop: <init>, <condition>, <step>: <branch>
+class LoopFor:
+    def __init__(self, init, condition, step, branch):
+        self.init = init
+        self.condition = condition
+        self.step = step
+        self.branch = branch
+
+    def __repr__(self):
+        return f"<LoopFor: {self.init}, {self.condition}, {self.step}, {self.branch}>"
+
 # statement [value]
 class FlowControl:
     def __init__(self, statement, value):

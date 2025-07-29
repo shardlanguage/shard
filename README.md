@@ -4,25 +4,26 @@
 *Shard* is a compiled programming language in active development.
 
 ## Features
+- sizeof and & (for address) operators
 - Inline C
-- Preprocessor (%include)
+- Preprocessor (@include)
 - Strings
 - Structures
 - Functions and procedures (main function required)
 - Static arrays (a[size] = [e1, e2, e3, e4])
-- Unsigned types (ubte, uword, udword, uqword)
+- Unsigned types (ubyte, uword, udword, uqword)
 - Comments (#)
 - Constants
 - Flow control statements
-- Loops (forever, while, until)
+- Loops (forever, while, until, for)
 - Better errors
 - Booleans, bit-boolean, assignment, bit-shifting and comparison operators
 - If/else conditions
 - Complete CLI
-- Static and strongly typed variables (byte, word, dword, qword, float, double)
+- Static and strongly-typed variables (byte, word, dword, qword, float, double, unsafe_str...)
 - Division by zero handling
 - Floating numbers support
-- Arithmetic expressions
+- Arithmetic expressions (modulo included)
 - Operators precedences
 - Statement lists
 
@@ -68,6 +69,8 @@ shardc -o example.shd                   # Compile a C file into an object file
 shardc -x example.shd                   # Compile an object file into an executable file
 shard -cox example.shd                  # All-in one -c -o and -x options
 shard -cox --keep-all example.shd       # Don't remove the generated files (.c and .o)
+shard option --dbg-err example.shd      # Show errors traceback directly to the compiler code.
+                                        # Only used for shardc features development
 ```
 
 ## Program example
@@ -77,7 +80,7 @@ You can try to compile and run the program below:
 # NOTE: as you can see, the last statement of a program or a code block does
 # not require a ;
 # But if you are making a module that will be included in another file using
-# %include, ; is required at the end of your module
+# @include, ; is required at the end of your module
 
 # Define a function to add 2 numbers and return the result
 # NOTE: dword handles 32-bit signed values
@@ -92,7 +95,7 @@ func dword main()
     # Define a structure to represent a point with a xy position
     struct Point
     {
-        string name,
+        unsafe_str name,
         dword x,
         dword y
     };

@@ -147,6 +147,13 @@ class Environment:
             branch = [self.evaluate(stmt) for stmt in node.branch.statement_list]
             return generate_LoopCondition(node.looptype, condition, branch)
 
+        elif isinstance(node, LoopFor):
+            init = self.evaluate(node.init)
+            condition = self.evaluate(node.condition)
+            step = self.evaluate(node.step)
+            branch = [self.evaluate(stmt) for stmt in node.branch.statement_list]
+            return generate_loop_for(init, condition, step, branch)
+
         elif isinstance(node, FlowControl):
             value = self.evaluate(node.value) if node.value is not None else None
             return generate_flow_control(node.statement, value)
@@ -244,7 +251,7 @@ class Environment:
 
         elif isinstance(node, InlineC):
             return generate_inline_c(node.code)
-
+            
         elif node is None:
             return ""
 

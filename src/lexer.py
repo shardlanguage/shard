@@ -16,7 +16,7 @@ keywords = {
     'word': 'WORD_T',
     'dword': 'DWORD_T',
     'qword': 'QWORD_T',
-    'string': 'STRING_T',
+    'unsafe_str': 'UNSAFE_STR_T',
     'float': 'FLOAT_T',
     'double': 'DOUBLE_T',
     'const': 'CONST_T',
@@ -39,13 +39,15 @@ keywords = {
     'return': 'RETURN',
     'struct': 'STRUCT',
     'c': 'C',
+    'for': 'FOR',
+    'sizeof': 'SIZEOF'
 }
 
 # Tokens tuple
 tokens = (
     'COMMENT', 'PP',
     'NUMBER', 'ID', 'STRING',
-    'PLUS', 'MINUS', 'STAR', 'SLASH', 'LSHIFT', 'RSHIFT',
+    'PLUS', 'MINUS', 'STAR', 'SLASH', 'LSHIFT', 'RSHIFT', 'PERCENT',
     'LPAR', 'RPAR', 'SEMI', 'LBRACE', 'RBRACE', 'LSQB', 'RSQB', 'COMMA', 'DOT',
     'EQUAL', 'PLUSEQ', 'MINUSEQ', 'STAREQ', 'SLASHEQ', 'ANDEQ', 'OREQ', 'XOREQ', 'NOTEQ', 'LSHIFTEQ', 'RSHIFTEQ',
     'BITAND', 'BITOR', 'XOR', 'BITNOT',
@@ -58,7 +60,7 @@ tokens += tuple(keywords.values())
 # Ignore space, tabs and comments (lines starting with #)
 t_ignore = ' \t'
 t_ignore_COMMENT = r'\#.*'
-t_ignore_PP = r'%.*'
+t_ignore_PP = r'@.*'
 
 # Regular expression for numbers, handling integers and floats
 t_NUMBER = r'\d+(\.\d+)?'
@@ -82,6 +84,7 @@ t_STAR = r'\*'
 t_SLASH = r'/'
 t_LSHIFT = r'<<'
 t_RSHIFT = r'>>'
+t_PERCENT = r'%'
 
 # Regular expressions for symbols
 t_LPAR = r'\('

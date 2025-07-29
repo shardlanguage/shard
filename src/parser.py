@@ -8,15 +8,15 @@
 # =====================================================================
 
 # Import modules
+import os
+import sys
 import ply.yacc as yacc
 
-from lexer import tokens
-from tree import *
-
-import sys
-import os
 from pathlib import Path
 from shutil import copyfile
+from lexer import tokens
+from tree import *
+from utils.text import find_column
 
 # shardc is converted to an executable file using PyInstaller, so this code defines 'base_path', that
 # can be used to find embedded files and directories
@@ -37,9 +37,9 @@ precedence = (
     ('nonassoc', 'LESS', 'GREAT', 'LESSEQ', 'GREATEQ', 'EQEQUAL', 'NOTEQUAL'),
     ('left', 'LSHIFT', 'RSHIFT'),
     ('left', 'PLUS', 'MINUS'),
-    ('left', 'STAR', 'SLASH'),
+    ('left', 'STAR', 'SLASH', 'PERCENT'),
     ('right', 'BITNOT'),
-    ('right', 'POSITIVE', 'NEGATIVE')
+    ('right', 'POSITIVE', 'NEGATIVE', 'ADDRESS')
 )
 
 # ==================== GRAMMAR RULES ======================
@@ -139,12 +139,16 @@ def p_expression_function_call(p):
 # -x
 # !x
 # ~x
+# sizeof x
+# &x
 def p_expression_unary_op(p):
     """
     expression : PLUS expression %prec POSITIVE
                | MINUS expression %prec NEGATIVE
                | NOT expression
                | BITNOT expression
+               | SIZEOF expression
+               | BITAND expression %prec ADDRESS
     """
     p[0] = UnaryOp(p[1], p[2])
 
@@ -152,13 +156,14 @@ def p_expression_unary_op(p):
 # x and y | x or y | x & y | x | y
 # x ^ y | x == y | x != y | x < y
 # x > y | x <= y | x >= y | x << y
-# x >> y
+# x >> y | x % y
 def p_expression_binary_op(p):
     """
     expression : expression PLUS expression
                | expression MINUS expression
                | expression STAR expression
                | expression SLASH expression
+               | expression PERCENT expression
                | expression AND expression
                | expression OR expression
                | expression BITAND expression
@@ -298,6 +303,13 @@ def p_loop_conditionnal(p):
     """
     p[0] = LoopConditionnal(p[1], p[2], p[3])
 
+# for type id = x; y; z {}
+def p_loop_for(p):
+    """
+    loop : FOR declaration separator expression separator expression codeblock
+    """
+    p[0] = LoopFor(p[2], p[4], p[6], p[7])
+
 # break
 # continue
 # return
@@ -334,7 +346,7 @@ def p_struct_definition(p):
     p[0] = StructureDefinition(p[2], p[4])
 
 # c { "code" }
-def p_c(p):
+def p_inline_c(p):
     """
     inline_c : C LBRACE STRING RBRACE
     """
@@ -357,14 +369,14 @@ def p_datatype(p):
     p[0] = [None, p[1]] if len(p) == 2 else [p[1], p[2]]
 
 # byte | word | dword | qword | float | double | ubyte | uword
-# udword | uqword | void
+# udword | uqword | void | id | struct id
 def p_primary_type(p):
     """
     primary_type : BYTE_T
                  | WORD_T
                  | DWORD_T
                  | QWORD_T
-                 | STRING_T
+                 | UNSAFE_STR_T
                  | FLOAT_T
                  | DOUBLE_T
                  | UBYTE_T
@@ -372,6 +384,7 @@ def p_primary_type(p):
                  | UDWORD_T
                  | UQWORD_T
                  | VOID_T
+                 | ID
                  | STRUCT ID
     """
     if len(p) == 2:
@@ -419,9 +432,23 @@ def p_parameter_declare(p):
 # Handle syntax errors
 def p_error(p):
     if p:
-        raise SyntaxError(f"Syntax error at \"{p.value}\" at line {p.lineno}")
+        token_type = p.type
+        token_value = p.value
+        lineno = p.lineno
+        col = find_column(p.lexer.lexdata, p)
+
+        lines = p.lexer.lexdata.splitlines()
+        faulty_line = lines[lineno - 1] if 0 < lineno <= len(lines) else ""
+
+        error_msg = (
+            f"Syntax error at line {lineno}, column {col}:\n"
+            f"    {faulty_line}\n"
+            f"    {' ' * (col - 1)}^\n"
+            f"Unexpected token '{token_value}' ({token_type})"
+        )
+        raise SyntaxError(error_msg)
     else:
-        raise SyntaxError("Unexpected end of statement")
+        raise SyntaxError("Syntax error: Unexpected end of statement")
 
 # Build the parser using the "parser_out" directory
-parser = yacc.yacc(outputdir=(base_path / "parser_out").mkdir(parents=True, exist_ok=True))
+parser = yacc.yacc(debug=False, outputdir=(base_path / "parser_out").mkdir(parents=True, exist_ok=True))

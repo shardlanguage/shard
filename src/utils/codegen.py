@@ -71,6 +71,8 @@ def generate_variable_declaration(type_modifier, primary_type, name, value):
 
     if c_type.startswith("struct"):
         return f"{prefix}{c_type} {name} = " + '{' + '0' + '}'
+    if c_type == "void":
+        raise TypeError(f"void type is reserved to functions")
     return f"{prefix}{c_type} {name} = {value}"
 
 # Generate an array declaration
@@ -81,7 +83,9 @@ def generate_array_declaration(type_modifier, primary_type, name, size, content)
     c_type = shard_type_to_c(primary_type)
     if c_type.startswith("struct"):
         raise TypeError("A structure instance cannot be declarated as an array")
-    
+    if c_type == "void":
+        raise TypeError(f"void type is reserved to functions")
+
     return f"{prefix}{c_type} {name}[{size}] = {content_str}"
 
 # Generate a code block
@@ -115,6 +119,12 @@ def generate_loop_conditionnal(looptype, condition, statement_list):
         return f"while (!({condition})) " + "{\n" + ''.join(stmt_list) + "}"
     else:
         raise ValueError(f"Unknown loop type: {looptype}")
+
+# Generate a for loop
+def generate_loop_for(init, condition, step, branch):
+    stmt_list = [f"    {stmt};\n" for stmt in branch]
+
+    return f"for ({init}; {condition}; {step}) " + '{\n' + ''.join(stmt_list) + ' }'
 
 # Generate flow control statements
 def generate_flow_control(statement, value):
@@ -174,16 +184,20 @@ def generate_UnOp(operator, right):
         '+': '+',
         '-': '-',
         'not': '!',
-        '~': '~'
+        '~': '~',
+        'sizeof': 'sizeof(',
+        '&': '&'
     }
     if operator not in op_map:
         raise ValueError(f"Unknown unary operator: {operator}")
+    if operator == "sizeof":
+        return generate_unary_op(op_map[operator], f"{right})")
     return generate_unary_op(op_map[operator], right)
 
 # Generate any binary operation
 def generate_BinOp(left, operator, right):
     op_map = {
-        '+': '+', '-': '-', '*': '*', '/': '/', '<<=': '<<=', '>>=': '>>=',
+        '+': '+', '-': '-', '*': '*', '/': '/', '<<': '<<', '>>': '>>', '%': '%',
         'and': '&&', 'or': '||',
         '&': '&', '|': '|', '^': '^',
         '==': '==', '!=': '!=',

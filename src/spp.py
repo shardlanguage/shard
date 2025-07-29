@@ -18,7 +18,7 @@ class SPP_Parser:
         self.code = code
         self.base_dir = base_dir
         self.included_files = []
-        self.instructions = ["%include"]
+        self.instructions = ["@include"]
 
     # Parse a file
     def parse_file(self, filename):
@@ -38,7 +38,7 @@ class SPP_Parser:
         return sub_parser.process()
 
     # Process instructions
-    # Only instructions starting with % are evaluated
+    # Only instructions starting with @ are evaluated
     def process(self):
         lines = self.code.splitlines()
         output = []
@@ -46,10 +46,10 @@ class SPP_Parser:
         for line in lines:
             stripped = line.strip()
 
-            if stripped.startswith("%include"):
+            if stripped.startswith("@include"):
                 parts = stripped.split(maxsplit=1)
                 if len(parts) != 2:
-                    raise SyntaxError("Missing filename in %include directive")
+                    raise SyntaxError("Missing filename in @include directive")
                 include_path = parts[1].strip('"')
                 included_code = self.parse_file(include_path)
                 output.append(included_code)

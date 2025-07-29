@@ -30,8 +30,11 @@ def replace_extension(filename, new_ext=None):
         return base
 
 # Function to compile Shard code to C from a file and write the generated C code
-# into a new file
-def compile_to_c(inputf):
+# into a new file.
+#
+# errdbg is set to False by default and is only used for shardc features development
+# and is useless for the user
+def compile_to_c(inputf, errdbg: bool=False):
     if os.path.exists(inputf):
         input_path = os.path.abspath(inputf)
         base_dir = os.path.dirname(input_path)
@@ -41,17 +44,22 @@ def compile_to_c(inputf):
 
         if content:
             spp_parser = SPP_Parser(content, base_dir)
-
             code = spp_parser.process()
 
             env = Environment()
-            
-            try:
+            ast = None
+            result = None
+
+            if errdbg:
                 ast = parser.parse(code)
                 result = env.compile_ast(ast)
-            except Exception as e:
-                print(f"ERROR: {e}")
-                sys.exit(1)
+            else:
+                try:
+                    ast = parser.parse(code)
+                    result = env.compile_ast(ast)
+                except Exception as e:
+                    print(f"ERROR: {e}")
+                    sys.exit(1)
 
             outputf = replace_extension(inputf, "c")
 
