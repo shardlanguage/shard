@@ -26,20 +26,30 @@ class CodeGenerator:
 
     def visit_NodeUnaryOp(self, node: NodeUnaryOp) -> None:
         node.right.accept(self)
-        code = ""
-        if node.op == '-':
-            code = self.arch.signed_value()
-        self.emit(code)
+        table = {
+            '-': self.arch.signed_value,
+            '~': self.arch.bitwise_not
+        }
+        self.emit(table[node.op]())
 
     def visit_NodeBinaryOp(self, node: NodeBinaryOp) -> None:
         node.left.accept(self)
         self.emit(self.arch.push())
         node.right.accept(self)
         self.emit(self.arch.pop())
-        if node.op == '+': self.emit(self.arch.add())
-        if node.op == '-': self.emit(self.arch.sub())
-        if node.op == '*': self.emit(self.arch.mul())
-        if node.op == '/': self.emit(self.arch.div())
+        table = {
+            '+': self.arch.add,
+            '-': self.arch.sub,
+            '*': self.arch.mul,
+            '/': self.arch.div,
+            '%': self.arch.modulo,
+            '&': self.arch.bitwise_and,
+            '|': self.arch.bitwise_or,
+            '^': self.arch.bitwise_xor,
+            '<<': self.arch.shift_left,
+            '>>': self.arch.shift_right
+        }
+        self.emit(table[node.op]())
 
     def visit_NodeGroup(self, node: NodeGroup) -> None:
         node.group.accept(self)

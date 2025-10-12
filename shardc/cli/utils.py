@@ -28,7 +28,7 @@ def parse_file(path: str) -> list:
 
     return ast
 
-def compile_file(path: str) -> None:
+def compile_file(path: str, output: str="output.asm") -> None:
     check_path(path)
     
     ast = parse_file(path)
@@ -37,6 +37,5 @@ def compile_file(path: str) -> None:
         if node is not None:
             cg.generate(node)
 
-    filename = path.replace(".sd", ".asm")
-    with open(filename, 'w', encoding="utf-8") as f:
+    with open(output, 'w', encoding="utf-8") as f:
         f.write('\n'.join(cg.output))

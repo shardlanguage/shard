@@ -15,4 +15,7 @@ def execute_args(args):
             print(node)
 
     if args.assembly:
-        compile_file(args.assembly)
+        if args.output:
+            compile_file(args.assembly, args.output)
+        else:
+            compile_file(args.assembly)

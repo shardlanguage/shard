@@ -9,6 +9,7 @@ def cli():
     parser.add_argument("-p", "--parse", type=str, help="Parse source code")
     parser.add_argument("-t", "--tree", type=str, help="Print AST")
     parser.add_argument("-s", "--assembly", type=str, help="Generate assembly code")
+    parser.add_argument("-o", "--output", type=str, help="Name of output file")
 
     args = parser.parse_args()
     execute_args(args)

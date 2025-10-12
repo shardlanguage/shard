@@ -15,8 +15,12 @@ class ShardParser:
 
     precedence = (
         ("left", "PLUS", "MINUS"),
-        ("left", "STAR", "SLASH"),
-        ("right", "POS", "NEG")
+        ("left", "STAR", "SLASH", "PERCENT"),
+        ("left", "LSHIFT", "RSHIFT"),
+        ("left", "AMPERSAND"),
+        ("left", "CARET"),
+        ("left", "PIPE"),
+        ("right", "POS", "NEG", "TILDE")
     )
 
     def p_program(self, p) -> None:
@@ -55,6 +59,7 @@ class ShardParser:
         """
         expression : PLUS expression %prec POS
                    | MINUS expression %prec NEG
+                   | TILDE expression
         """
         p[0] = NodeUnaryOp(p[1], p[2])
 
@@ -64,6 +69,12 @@ class ShardParser:
                    | expression MINUS expression
                    | expression STAR expression
                    | expression SLASH expression
+                   | expression PERCENT expression
+                   | expression AMPERSAND expression
+                   | expression CARET expression
+                   | expression PIPE expression
+                   | expression LSHIFT expression
+                   | expression RSHIFT expression
         """
         p[0] = NodeBinaryOp(p[2], p[1], p[3])
 

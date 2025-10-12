@@ -9,7 +9,8 @@ class ShardLexer:
 
     tokens = (
         "NUMBER",
-        "PLUS", "MINUS", "STAR", "SLASH",
+        "PLUS", "MINUS", "STAR", "SLASH", "PERCENT",
+        "LSHIFT", "RSHIFT", "AMPERSAND", "PIPE", "CARET", "TILDE",
         "LPAR", "RPAR", "SEMI"
     )
 
@@ -19,6 +20,14 @@ class ShardLexer:
     t_MINUS = r'-'
     t_STAR = r'\*'
     t_SLASH = r'/'
+    t_PERCENT = r'%'
+
+    t_LSHIFT = r'<<'
+    t_RSHIFT = r'>>'
+    t_AMPERSAND = r'&'
+    t_PIPE = r'\|'
+    t_CARET = r'\^'
+    t_TILDE = r'~'
 
     t_LPAR = r'\('
     t_RPAR = r'\)'
