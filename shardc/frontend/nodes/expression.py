@@ -1,4 +1,6 @@
-class NodeValue:
+from shardc.frontend.nodes.node import Node
+
+class NodeValue(Node):
     def __init__(self, value, t):
         self.value = value
         self.t = t
@@ -6,7 +8,7 @@ class NodeValue:
     def __repr__(self):
         return f"NodeValue(value={self.value}, type={self.t})"
 
-class NodeUnaryOp:
+class NodeUnaryOp(Node):
     def __init__(self, op, right):
         self.op = op
         self.right = right
@@ -14,7 +16,7 @@ class NodeUnaryOp:
     def __repr__(self):
         return f"NodeUnaryOp(op={self.op}, right={self.right})"
 
-class NodeBinaryOp:
+class NodeBinaryOp(Node):
     def __init__(self, op, left, right):
         self.op = op
         self.left = left
@@ -23,7 +25,7 @@ class NodeBinaryOp:
     def __repr__(self):
         return f"NodeBinaryOp(op={self.op}, left={self.left}, right={self.right})"
 
-class NodeGroup:
+class NodeGroup(Node):
     def __init__(self, group):
         self.group = group
 

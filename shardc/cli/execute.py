@@ -1,4 +1,4 @@
-from shardc.cli.utils import lex_file, parse_file
+from shardc.cli.utils import compile_file, lex_file, parse_file
 
 def execute_args(args):
     if args.lex:
@@ -13,3 +13,6 @@ def execute_args(args):
         ast = parse_file(args.tree)
         for node in ast:
             print(node)
+
+    if args.assembly:
+        compile_file(args.assembly)
