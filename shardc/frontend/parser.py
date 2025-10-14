@@ -2,7 +2,8 @@ from typing import Any
 import ply.yacc as yacc
 
 from shardc.frontend.lexer import ShardLexer
-from shardc.frontend.nodes.expression import NodeBinaryOp, NodeGroup, NodeUnaryOp, NodeValue
+from shardc.frontend.nodes.declaration import NodeVariableDecl
+from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeGroup, NodeID, NodeUnaryOp, NodeValue
 from shardc.utils.const.types import INT
 from shardc.utils.errors.syntax import ShardError_BadSyntax
 
@@ -14,13 +15,14 @@ class ShardParser:
         self.tokens = self.lexer.tokens
 
     precedence = (
+        ("right", "EQUAL"),
         ("left", "PLUS", "MINUS"),
         ("left", "STAR", "SLASH", "PERCENT"),
         ("left", "LSHIFT", "RSHIFT"),
         ("left", "AMPERSAND"),
         ("left", "CARET"),
         ("left", "PIPE"),
-        ("right", "POS", "NEG", "TILDE")
+        ("right", "POS", "NEG", "TILDE"),
     )
 
     def p_program(self, p) -> None:
@@ -46,14 +48,21 @@ class ShardParser:
     def p_statement(self, p) -> None:
         """
         statement : expression SEMI
+                  | declaration SEMI
         """
         p[0] = p[1]
 
-    def p_expression_value(self, p) -> None:
+    def p_expression_number(self, p) -> None:
         """
         expression : NUMBER
         """
         p[0] = NodeValue(p[1], INT)
+
+    def p_expression_id(self, p) -> None:
+        """
+        expression : id_access
+        """
+        p[0] = NodeID(p[1])
 
     def p_expression_unary(self, p) -> None:
         """
@@ -78,11 +87,41 @@ class ShardParser:
         """
         p[0] = NodeBinaryOp(p[2], p[1], p[3])
 
+    def p_expression_assignment(self, p) -> None:
+        """
+        expression : id_access EQUAL expression
+        """
+        p[0] = NodeAssignOp(p[1], p[2], p[3])
+
     def p_expression_group(self, p) -> None:
         """
         expression : LPAR expression RPAR
         """
         p[0] = NodeGroup(p[2])
+
+    def p_declaration_variable(self, p) -> None:
+        """
+        declaration : prefix ID COLON type EQUAL expression
+        """
+        p[0] = NodeVariableDecl(p[1], p[2], p[4], p[6])
+
+    def p_id_access(self, p) -> None:
+        """
+        id_access : ID
+        """
+        p[0] = p[1]
+
+    def p_prefix(self, p) -> None:
+        """
+        prefix : VAR
+        """
+        p[0] = p[1]
+
+    def p_type(self, p) -> None:
+        """
+        type : ID
+        """
+        p[0] = p[1]
 
     def p_error(self, p) -> None:
         ShardError_BadSyntax(p.value if p else "EOF", p.lexer.lineno).display()

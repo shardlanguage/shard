@@ -4,63 +4,78 @@ class x86_64(Architecture):
     name = "x86_64"
     word_size = 64
 
-    def integer(self, value) -> str:
-        return f"mov rax, {value}"
+    section_text = []
+    section_data = []
+    section_bss = []
+    section_rodata = []
 
-    def signed_value(self) -> str:
-        return "neg rax"
+    def section(self, name: str) -> str:
+        return f"\nsection .{name}\n"
 
-    def add(self) -> str:
-        return "add rax, rbx"
+    def integer(self, value) -> None:
+        self.section_text.append(f"mov rax, {value}")
 
-    def sub(self) -> str:
-        return '\n'.join([
-            "sub rbx, rax",
-            "mov rax, rbx"
-        ])
+    def signed_value(self) -> None:
+        self.section_text.append("neg rax")
 
-    def mul(self) -> str:
-        return "imul rax, rbx"
+    def move_addr(self, addr) -> None:
+        self.section_text.append(f"mov rax, [{addr}]")
 
-    def div(self) -> str:
-        return '\n'.join([
-            "xor rdx, rdx",
-            "idiv rbx"
-        ])
+    def store_addr(self, addr) -> None:
+        self.section_text.append(f"mov [{addr}], rax")
 
-    def modulo(self) -> str:
-        return '\n'.join([
-            "xor rdx, rdx",
-            "idiv rbx",
-            "mov rax, rdx"
-        ])
+    def add(self) -> None:
+        self.section_text.append("add rax, rbx")
 
-    def bitwise_and(self) -> str:
-        return "and rax, rbx"
+    def sub(self) -> None:
+        self.section_text.append("sub rax, rbx")
 
-    def bitwise_or(self) -> str:
-        return "or rax, rbx"
+    def mul(self) -> None:
+        self.section_text.append("imul rax, rbx")
 
-    def bitwise_xor(self) -> str:
-        return "xor rax, rbx"
+    def div(self) -> None:
+        self.section_text.append("xor rdx, rdx")
+        self.section_text.append("idiv rbx")
 
-    def bitwise_not(self) -> str:
-        return "not rax"
+    def modulo(self) -> None:
+        self.section_text.append("xor rdx, rdx")
+        self.section_text.append("idiv rbx")
+        self.section_text.append("mov rax, rdx")
 
-    def shift_left(self) -> str:
-        return '\n'.join([
-            "mov rcx, rbx",
-            "shl rax, cl"
-        ])
+    def bitwise_and(self) -> None:
+        self.section_text.append("and rax, rbx")
 
-    def shift_right(self) -> str:
-        return '\n'.join([
-            "mov rcx, rbx",
-            "sar rax, cl"
-        ])
+    def bitwise_or(self) -> None:
+        self.section_text.append("or rax, rbx")
 
-    def push(self) -> str:
-        return "push rax"
+    def bitwise_xor(self) -> None:
+        self.section_text.append("xor rax, rbx")
 
-    def pop(self) -> str:
-        return "pop rbx"
+    def bitwise_not(self) -> None:
+        self.section_text.append("not rax")
+
+    def shift_left(self) -> None:
+        self.section_text.append("mov rcx, rbx")
+        self.section_text.append("shl rax, cl")
+
+    def shift_right(self) -> None:
+        self.section_text.append("mov rcx, rbx")
+        self.section_text.append("sar rax, cl")
+
+    def push(self) -> None:
+        self.section_text.append("push rax")
+
+    def pop(self) -> None:
+        self.section_text.append("pop rbx")
+
+    def define_variable(self, name, size, value) -> None:
+        sizes = {
+            8: "db",
+            16: "dw",
+            32: "dd",
+            64: "dq"
+        }
+        self.section_data.append(f"{name}: {sizes[size.size]} {value}")
+
+    def access_value(self, address) -> None:
+        self.section_text.append(f"mov rax, [{address}]")

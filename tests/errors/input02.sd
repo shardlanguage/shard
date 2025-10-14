@@ -1,0 +1,2 @@
+var already_defined: i64 = 18;
+var already_defined: i64 = 29;

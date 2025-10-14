@@ -1,8 +1,12 @@
 from shardc.backend.codegen.x86_64 import x86_64
+from shardc.backend.compiler import Compiler
 from shardc.backend.visitor import CodeGenerator
 from shardc.frontend.lexer import ShardLexer
 from shardc.frontend.parser import ShardParser
+from shardc.frontend.symbols.resolver import SymbolResolver
+from shardc.frontend.symbols.table import SymbolTable
 from shardc.utils.checks import check_path
+from shardc.utils.types.table import TypeTable
 
 def lex_file(path: str) -> list:
     check_path(path)
@@ -32,10 +36,10 @@ def compile_file(path: str, output: str="output.asm") -> None:
     check_path(path)
     
     ast = parse_file(path)
-    cg = CodeGenerator(x86_64())
+    compiler = Compiler(SymbolResolver(SymbolTable(), TypeTable()), CodeGenerator(x86_64()))
     for node in ast:
         if node is not None:
-            cg.generate(node)
+            compiler.compile_node(node)
 
     with open(output, 'w', encoding="utf-8") as f:
-        f.write('\n'.join(cg.output))
+        f.write(compiler.cg.output)

@@ -1,3 +1,4 @@
+from ast import keyword
 from typing import Any
 import ply.lex as lex
 
@@ -7,11 +8,16 @@ class ShardLexer:
     def __init__(self):
         self.lexer: Any = None
 
-    tokens = (
-        "NUMBER",
+    keywords = {
+        "var": "VAR",
+    }
+
+    tokens = tuple(keywords.values()) + (
+        "NUMBER", "ID",
         "PLUS", "MINUS", "STAR", "SLASH", "PERCENT",
         "LSHIFT", "RSHIFT", "AMPERSAND", "PIPE", "CARET", "TILDE",
-        "LPAR", "RPAR", "SEMI"
+        "EQUAL",
+        "LPAR", "RPAR", "SEMI", "COLON"
     )
 
     t_NUMBER = r'\d+'
@@ -29,9 +35,17 @@ class ShardLexer:
     t_CARET = r'\^'
     t_TILDE = r'~'
 
+    t_EQUAL = r'='
+
     t_LPAR = r'\('
     t_RPAR = r'\)'
     t_SEMI = r';'
+    t_COLON = ':'
+
+    @lex.Token(r'[a-zA-Z_][a-zA-Z0-9_]*')
+    def t_ID(self, t):
+        t.type = self.keywords.get(t.value, "ID")
+        return t
 
     @lex.Token(r'\n+')
     def t_newline(self, t) -> None:

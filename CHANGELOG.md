@@ -1,3 +1,10 @@
+## Version 0.0.2
+- Added variable declarations: `var x: T = y;`
+- Added variable assignments using `=`
+- Added a symbol table, a type table and a symbol resolver
+- Cleaned up the code
+- Added signed data types: `i8`, `i16`, `i32`, `i64`
+
 ## Version 0.0.1
 - Added arithmetic operator: `%`
 - Added bitwise operators: `&`, `|`, `^`, `~`

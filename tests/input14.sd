@@ -1,0 +1,7 @@
+var a: i64 = 1;
+var b: i64 = 2;
+var c: i64 = a + b;
+var d: i64 = c * 4;
+b = b + 5;
+c = (a + b) * d;
+a = c / 3;

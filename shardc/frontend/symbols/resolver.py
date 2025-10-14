@@ -1,0 +1,45 @@
+from shardc.frontend.nodes.declaration import NodeVariableDecl
+from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeGroup, NodeID, NodeUnaryOp
+from shardc.frontend.symbols.variable import ShardVariable
+from shardc.frontend.symbols.table import SymbolTable
+from shardc.frontend.nodes.node import Node
+from shardc.utils.types.datatype import ShardType
+from shardc.utils.types.table import TypeTable
+
+class SymbolResolver:
+    def __init__(self, symbol_table: SymbolTable, type_table: TypeTable):
+        self.symbol_table = symbol_table
+        self.type_table = type_table
+
+    def resolve_symbols(self, node: Node) -> None:
+        function_name = f"resolve_{type(node).__name__}"
+        function = getattr(self, function_name, self.generic_resolve)
+        function(node)
+
+    def generic_resolve(self, node: Node) -> None:
+        pass
+
+    def resolve_NodeID(self, node: NodeID) -> None:
+        symbol = self.symbol_table.get_symbol(node.name)
+        node.symbol = symbol
+
+    def resolve_NodeUnaryOp(self, node: NodeUnaryOp) -> None:
+        self.resolve_symbols(node.right)
+
+    def resolve_NodeBinaryOp(self, node: NodeBinaryOp) -> None:
+        self.resolve_symbols(node.left)
+        self.resolve_symbols(node.right)
+
+    def resolve_NodeAssignOp(self, node: NodeAssignOp) -> None:
+        self.resolve_symbols(NodeID(node.name))
+        self.resolve_symbols(node.val)
+
+    def resolve_NodeGroup(self, node: NodeGroup) -> None:
+        self.resolve_symbols(node.group)
+
+    def resolve_NodeVariableDecl(self, node: NodeVariableDecl) -> None:
+        self.resolve_symbols(node.val)
+        t = self.type_table.get_type(node.t)
+        var = ShardVariable(node.prefix, node.name, node.t)
+        self.symbol_table.add_symbol(var)
+        node.datatype = t
