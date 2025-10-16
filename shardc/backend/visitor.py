@@ -1,12 +1,11 @@
-from shardc.backend.codegen import architecure
+import functools
 from shardc.backend.codegen.architecure import Architecture
 from shardc.frontend.nodes.declaration import NodeVariableDecl
 from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeGroup, NodeID, NodeUnaryOp, NodeValue
 from shardc.frontend.symbols.variable import ShardVariable
+from shardc.utils.const import comparisons
+from shardc.utils.const.comparisons import EQUAL, GT_SIGNED, GT_UNSIGNED, GTQ_SIGNED, GTQ_UNSIGNED, LT_SIGNED, LT_UNSIGNED, LTQ_SIGNED, LTQ_UNSIGNED, NOT_EQUAL
 from shardc.utils.const.types import INT
-import inspect
-
-from shardc.utils.types.datatype import ShardType
 
 class CodeGenerator:
     def __init__(self, arch: Architecture):
@@ -63,7 +62,13 @@ class CodeGenerator:
             '|': self.arch.bitwise_or,
             '^': self.arch.bitwise_xor,
             '<<': self.arch.shift_left,
-            '>>': self.arch.shift_right if not signed else self.arch.signed_shift_right
+            '>>': self.arch.shift_right if not signed else self.arch.signed_shift_right,
+            '==': functools.partial(self.arch.compare, comparison=EQUAL),
+            '!=': functools.partial(self.arch.compare, comparison=NOT_EQUAL),
+            '<': functools.partial(self.arch.compare, comparison=LT_UNSIGNED if not signed else LT_SIGNED),
+            '>': functools.partial(self.arch.compare, comparison=GT_UNSIGNED if not signed else GT_SIGNED),
+            '<=': functools.partial(self.arch.compare, comparison=LTQ_UNSIGNED if not signed else LTQ_SIGNED),
+            '>=': functools.partial(self.arch.compare, comparison=GTQ_UNSIGNED if not signed else GTQ_SIGNED)
         }
 
         func = table[node.op]

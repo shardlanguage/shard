@@ -1,4 +1,5 @@
 from shardc.backend.codegen.architecure import Architecture
+from shardc.utils.const.comparisons import EQUAL, GT_SIGNED, GT_UNSIGNED, GTQ_SIGNED, GTQ_UNSIGNED, LT_SIGNED, LT_UNSIGNED, LTQ_SIGNED, LTQ_UNSIGNED, NOT_EQUAL
 
 class x86_64(Architecture):
     name = "x86_64"
@@ -93,3 +94,21 @@ class x86_64(Architecture):
 
     def access_value(self, address) -> None:
         self.section_text.append(f"mov rax, [{address}]")
+
+    def compare(self, comparison: int) -> None:
+        table = {
+            EQUAL: "sete al",
+            NOT_EQUAL: "setne al",
+            LT_SIGNED: "setl al",
+            LT_UNSIGNED: "setb al",
+            GT_SIGNED: "setg al",
+            GT_UNSIGNED: "seta al",
+            LTQ_SIGNED: "setle al",
+            LTQ_UNSIGNED: "setbe al",
+            GTQ_SIGNED: "setge al",
+            GTQ_UNSIGNED: "setae al"
+        }
+
+        self.section_text.append("cmp rax, rbx")
+        self.section_text.append(table.get(comparison))
+        self.section_text.append("movzx rax, al")

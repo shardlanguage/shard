@@ -18,6 +18,7 @@ class ShardLexer:
         "LSHIFT", "RSHIFT", "AMPERSAND", "PIPE", "CARET", "TILDE",
         "EQUAL", "PLUSEQ", "MINUSEQ", "STAREQ", "SLASHEQ", "PERCENTEQ",
         "LSHIFTEQ", "RSHIFTEQ", "AMPERSANDEQ", "PIPEEQ", "CARETEQ", "TILDEEQ",
+        "EQEQ", "NOTEQ", "LT", "GT", "LTEQ", "GTEQ",
         "LPAR", "RPAR", "SEMI", "COLON"
     )
 
@@ -49,6 +50,13 @@ class ShardLexer:
     t_CARETEQ = r'\^='
     t_TILDEEQ = r'~='
 
+    t_EQEQ = r'=='
+    t_NOTEQ = r'!='
+    t_LT = r'<'
+    t_GT = r'>'
+    t_LTEQ = r'<='
+    t_GTEQ = r'>='
+
     t_LPAR = r'\('
     t_RPAR = r'\)'
     t_SEMI = r';'
@@ -64,6 +72,8 @@ class ShardLexer:
         t.lexer.lineno += len(t.value)
 
     t_ignore = ' \t'
+    t_ignore_COMMENT = r'//.*'
+    t_ignore_MULTILINE_COMMENT = r'/\*[\s\S]*?\*/'
 
     def t_error(self, t) -> None:
         ShardError_IllegalCharacter(t.value[0], t.lexer.lineno, t.lexer.lexpos).display()

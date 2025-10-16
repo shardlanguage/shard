@@ -78,3 +78,6 @@ class Architecture(ABC):
 
     @abstractmethod
     def access_value(self, address) -> None: ...
+
+    @abstractmethod
+    def compare(self, comparison: int) -> None: ...

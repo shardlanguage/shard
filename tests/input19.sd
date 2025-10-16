@@ -1,0 +1,17 @@
+/*
+    This is just a test program
+    name: input19
+*/
+
+var x: i32 = 5;             // declare variable x
+var y: u32 = 8;             // declare variable y
+
+/*
+    Test comparisons
+*/
+x == y;
+y < x;
+x >= y;
+y > x;
+x != y;
+y <= x;

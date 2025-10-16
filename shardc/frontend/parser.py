@@ -19,6 +19,8 @@ class ShardParser:
         ("left", "PLUS", "MINUS"),
         ("left", "STAR", "SLASH", "PERCENT"),
         ("left", "LSHIFT", "RSHIFT"),
+        ("left", "LT", "GT", "LTEQ", "GTEQ"),
+        ("left", "EQEQ", "NOTEQ"),
         ("left", "AMPERSAND"),
         ("left", "CARET"),
         ("left", "PIPE"),
@@ -84,6 +86,12 @@ class ShardParser:
                    | expression PIPE expression
                    | expression LSHIFT expression
                    | expression RSHIFT expression
+                   | expression EQEQ expression
+                   | expression NOTEQ expression
+                   | expression LT expression
+                   | expression GT expression
+                   | expression LTEQ expression
+                   | expression GTEQ expression
         """
         p[0] = NodeBinaryOp(p[2], p[1], p[3])
 

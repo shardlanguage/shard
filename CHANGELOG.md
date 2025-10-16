@@ -1,3 +1,7 @@
+## Version 0.0.4
+- Added comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`
+- Added single-line and multi-line comments: `//`, `/**/`
+
 ## Version 0.0.3
 - Added unsigned data types: `u8`, `u16`, `u32`, `u64`
 - Signed / unsigned operations are now handled
