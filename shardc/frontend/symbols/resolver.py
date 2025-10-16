@@ -31,7 +31,9 @@ class SymbolResolver:
         self.resolve_symbols(node.right)
 
     def resolve_NodeAssignOp(self, node: NodeAssignOp) -> None:
-        self.resolve_symbols(NodeID(node.name))
+        symbol = self.symbol_table.get_symbol(node.name)
+        node.symbol = symbol
+
         self.resolve_symbols(node.val)
 
     def resolve_NodeGroup(self, node: NodeGroup) -> None:
@@ -40,6 +42,6 @@ class SymbolResolver:
     def resolve_NodeVariableDecl(self, node: NodeVariableDecl) -> None:
         self.resolve_symbols(node.val)
         t = self.type_table.get_type(node.t)
-        var = ShardVariable(node.prefix, node.name, node.t)
+        var = ShardVariable(node.prefix, node.name, t)
         self.symbol_table.add_symbol(var)
         node.datatype = t

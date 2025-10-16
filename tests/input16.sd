@@ -1,0 +1,7 @@
+var x: i64 = 5;
+var y: i64 = 6;
+
+var z: i64 = x + y;
+
+x >> y;
+z * y - (3 / z);

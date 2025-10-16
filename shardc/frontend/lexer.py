@@ -16,7 +16,8 @@ class ShardLexer:
         "NUMBER", "ID",
         "PLUS", "MINUS", "STAR", "SLASH", "PERCENT",
         "LSHIFT", "RSHIFT", "AMPERSAND", "PIPE", "CARET", "TILDE",
-        "EQUAL",
+        "EQUAL", "PLUSEQ", "MINUSEQ", "STAREQ", "SLASHEQ", "PERCENTEQ",
+        "LSHIFTEQ", "RSHIFTEQ", "AMPERSANDEQ", "PIPEEQ", "CARETEQ", "TILDEEQ",
         "LPAR", "RPAR", "SEMI", "COLON"
     )
 
@@ -36,6 +37,17 @@ class ShardLexer:
     t_TILDE = r'~'
 
     t_EQUAL = r'='
+    t_PLUSEQ = r'\+='
+    t_MINUSEQ = r'-='
+    t_STAREQ = r'\*='
+    t_SLASHEQ = r'/='
+    t_PERCENTEQ = r'%='
+    t_LSHIFTEQ = r'<<='
+    t_RSHIFTEQ = r'>>='
+    t_AMPERSANDEQ = r'&='
+    t_PIPEEQ = r'\|='
+    t_CARETEQ = r'\^='
+    t_TILDEEQ = r'~='
 
     t_LPAR = r'\('
     t_RPAR = r'\)'

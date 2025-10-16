@@ -39,9 +39,10 @@ class NodeAssignOp(Node):
         self.name = name
         self.op = op
         self.val = val
+        self.symbol: Symbol
 
     def __repr__(self):
-        return f"NodeAssignOp(name={self.name}, op={self.op}, val={self.val})"
+        return f"NodeAssignOp(name={self.name}, op={self.op}, val={self.val}, symbol={self.symbol})"
 
 class NodeGroup(Node):
     def __init__(self, group):

@@ -15,7 +15,7 @@ class ShardParser:
         self.tokens = self.lexer.tokens
 
     precedence = (
-        ("right", "EQUAL"),
+        ("right", "EQUAL", "PLUSEQ", "MINUSEQ", "STAREQ", "SLASHEQ", "PERCENTEQ", "LSHIFTEQ", "RSHIFTEQ", "AMPERSANDEQ", "PIPEEQ", "CARETEQ", "TILDEEQ"),
         ("left", "PLUS", "MINUS"),
         ("left", "STAR", "SLASH", "PERCENT"),
         ("left", "LSHIFT", "RSHIFT"),
@@ -90,6 +90,17 @@ class ShardParser:
     def p_expression_assignment(self, p) -> None:
         """
         expression : id_access EQUAL expression
+                   | id_access PLUSEQ expression
+                   | id_access MINUSEQ expression
+                   | id_access STAREQ expression
+                   | id_access SLASHEQ expression
+                   | id_access PERCENTEQ expression
+                   | id_access LSHIFTEQ expression
+                   | id_access RSHIFTEQ expression
+                   | id_access AMPERSANDEQ expression
+                   | id_access PIPEEQ expression
+                   | id_access CARETEQ expression
+                   | id_access TILDEEQ expression
         """
         p[0] = NodeAssignOp(p[1], p[2], p[3])
 

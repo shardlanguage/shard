@@ -4,10 +4,11 @@ class x86_64(Architecture):
     name = "x86_64"
     word_size = 64
 
-    section_text = []
-    section_data = []
-    section_bss = []
-    section_rodata = []
+    def __init__(self):
+        self.section_text = []
+        self.section_data = []
+        self.section_bss = []
+        self.section_rodata = []
 
     def section(self, name: str) -> str:
         return f"\nsection .{name}\n"
@@ -35,10 +36,19 @@ class x86_64(Architecture):
 
     def div(self) -> None:
         self.section_text.append("xor rdx, rdx")
+        self.section_text.append("div rbx")
+
+    def signed_div(self) -> None:
+        self.section_text.append("cqo")
         self.section_text.append("idiv rbx")
 
     def modulo(self) -> None:
         self.section_text.append("xor rdx, rdx")
+        self.section_text.append("div rbx")
+        self.section_text.append("mov rax, rdx")
+
+    def signed_modulo(self) -> None:
+        self.section_text.append("cqo")
         self.section_text.append("idiv rbx")
         self.section_text.append("mov rax, rdx")
 
@@ -60,6 +70,10 @@ class x86_64(Architecture):
 
     def shift_right(self) -> None:
         self.section_text.append("mov rcx, rbx")
+        self.section_text.append("shr rax, cl")
+
+    def signed_shift_right(self) -> None:
+        self.section_text.append("mov rcx, rbx")
         self.section_text.append("sar rax, cl")
 
     def push(self) -> None:
@@ -68,14 +82,14 @@ class x86_64(Architecture):
     def pop(self) -> None:
         self.section_text.append("pop rbx")
 
-    def define_variable(self, name, size, value) -> None:
+    def define_variable(self, name, t, value) -> None:
         sizes = {
             8: "db",
             16: "dw",
             32: "dd",
             64: "dq"
         }
-        self.section_data.append(f"{name}: {sizes[size.size]} {value}")
+        self.section_data.append(f"{name}: {sizes[t.size]} {value}")
 
     def access_value(self, address) -> None:
         self.section_text.append(f"mov rax, [{address}]")

@@ -1,7 +1,12 @@
+from shardc.backend.codegen import architecure
 from shardc.backend.codegen.architecure import Architecture
 from shardc.frontend.nodes.declaration import NodeVariableDecl
 from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeGroup, NodeID, NodeUnaryOp, NodeValue
+from shardc.frontend.symbols.variable import ShardVariable
 from shardc.utils.const.types import INT
+import inspect
+
+from shardc.utils.types.datatype import ShardType
 
 class CodeGenerator:
     def __init__(self, arch: Architecture):
@@ -45,22 +50,51 @@ class CodeGenerator:
         self.arch.push()
         node.left.accept(self)
         self.arch.pop()
+
+        signed = (isinstance(node.left, NodeID) and isinstance(node.left.symbol, ShardVariable) and node.left.symbol.t.signed) or (isinstance(node.right, NodeID) and isinstance(node.right.symbol, ShardVariable) and node.right.symbol.t.signed)
+
         table = {
             '+': self.arch.add,
             '-': self.arch.sub,
             '*': self.arch.mul,
-            '/': self.arch.div,
-            '%': self.arch.modulo,
+            '/': self.arch.div if not signed else self.arch.signed_div,
+            '%': self.arch.modulo if not signed else self.arch.signed_modulo,
             '&': self.arch.bitwise_and,
             '|': self.arch.bitwise_or,
             '^': self.arch.bitwise_xor,
             '<<': self.arch.shift_left,
-            '>>': self.arch.shift_right
+            '>>': self.arch.shift_right if not signed else self.arch.signed_shift_right
         }
-        table[node.op]()
+
+        func = table[node.op]
+        func()
 
     def visit_NodeAssignOp(self, node: NodeAssignOp) -> None:
+        self.arch.move_addr(node.name)
+        self.arch.push()
         node.val.accept(self)
+        self.arch.pop()
+
+        signed = isinstance(node.symbol, ShardVariable) and node.symbol.t.signed
+
+        table = {
+            '=': None,
+            '+=': self.arch.add,
+            '-=': self.arch.sub,
+            '*=': self.arch.mul,
+            '/=': self.arch.div if not signed else self.arch.signed_div,
+            '%=': self.arch.modulo if not signed else self.arch.signed_modulo,
+            '<<=': self.arch.shift_left,
+            '>>=': self.arch.shift_right if not signed else self.arch.signed_shift_right,
+            '&=': self.arch.bitwise_and,
+            '|=': self.arch.bitwise_or,
+            '^=': self.arch.bitwise_xor,
+            '~=': self.arch.bitwise_not
+        }
+
+        func = table[node.op]
+        if func is not None:
+            func()
         self.arch.store_addr(node.name)
 
     def visit_NodeGroup(self, node: NodeGroup) -> None:
@@ -72,5 +106,5 @@ class CodeGenerator:
             self.arch.define_variable(node.name, node.datatype, value)
         else:
             node.val.accept(self)
-            self.arch.move_addr(node.name)
+            self.arch.store_addr(node.name)
             self.arch.define_variable(node.name, node.datatype, 0)

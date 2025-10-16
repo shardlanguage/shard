@@ -4,10 +4,11 @@ class Architecture(ABC):
     name: str = "unknown"
     word_size: int = 0
 
-    section_text: list = []
-    section_data: list = []
-    section_bss: list = []
-    section_rodata: list = []
+    def __init__(self):
+        self.section_text: list = []
+        self.section_data: list = []
+        self.section_bss: list = []
+        self.section_rodata: list = []
 
     @abstractmethod
     def section(self, name: str) -> str: ...
@@ -37,7 +38,13 @@ class Architecture(ABC):
     def div(self) -> None: ...
 
     @abstractmethod
+    def signed_div(self) -> None: ...
+
+    @abstractmethod
     def modulo(self) -> None: ...
+
+    @abstractmethod
+    def signed_modulo(self) -> None: ...
 
     @abstractmethod
     def bitwise_and(self) -> None: ...
@@ -58,13 +65,16 @@ class Architecture(ABC):
     def shift_right(self) -> None: ...
 
     @abstractmethod
+    def signed_shift_right(self) -> None: ...
+
+    @abstractmethod
     def push(self) -> None: ...
 
     @abstractmethod
     def pop(self) -> None: ...
 
     @abstractmethod
-    def define_variable(self, name, size, value) -> None: ...
+    def define_variable(self, name, t, value) -> None: ...
 
     @abstractmethod
     def access_value(self, address) -> None: ...
