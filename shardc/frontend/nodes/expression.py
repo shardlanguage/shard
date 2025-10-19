@@ -21,18 +21,20 @@ class NodeUnaryOp(Node):
     def __init__(self, op, right):
         self.op = op
         self.right = right
+        self.val = 0
 
     def __repr__(self):
-        return f"NodeUnaryOp(op={self.op}, right={self.right})"
+        return f"NodeUnaryOp(op={self.op}, right={self.right}, val={self.val})"
 
 class NodeBinaryOp(Node):
     def __init__(self, op, left, right):
         self.op = op
         self.left = left
         self.right = right
+        self.val = 0
 
     def __repr__(self):
-        return f"NodeBinaryOp(op={self.op}, left={self.left}, right={self.right})"
+        return f"NodeBinaryOp(op={self.op}, left={self.left}, right={self.right}, val={self.val})"
 
 class NodeAssignOp(Node):
     def __init__(self, name, op, val):

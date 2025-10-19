@@ -1,0 +1,12 @@
+// Constants declarations are a bit special
+
+// If we do this:
+const x: i32 = 0;
+// The compiler will accept it and generate x: dd 0 in .rodata
+
+// But if we do this:
+const y: i32;
+// We know that both are the same. But shardc does not have implicit behaviour
+// so it should raise an error
+
+// If you want to declare a zero constant, always use the first method

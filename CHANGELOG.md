@@ -1,3 +1,9 @@
+## Version 0.0.5
+- Added uninitialized variables (it is like `var x: T = 0`): `var x: T`
+- Variables initialized with 0 are now generated in the .bss section
+- Added constants declared with `const` and generated in `.rodata`
+- Added a constant folder
+
 ## Version 0.0.4
 - Added comparison operators: `==`, `!=`, `<`, `>`, `<=`, `>=`
 - Added single-line and multi-line comments: `//`, `/**/`

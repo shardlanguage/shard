@@ -3,9 +3,9 @@ from shardc.backend.codegen.architecure import Architecture
 from shardc.frontend.nodes.declaration import NodeVariableDecl
 from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeGroup, NodeID, NodeUnaryOp, NodeValue
 from shardc.frontend.symbols.variable import ShardVariable
-from shardc.utils.const import comparisons
 from shardc.utils.const.comparisons import EQUAL, GT_SIGNED, GT_UNSIGNED, GTQ_SIGNED, GTQ_UNSIGNED, LT_SIGNED, LT_UNSIGNED, LTQ_SIGNED, LTQ_UNSIGNED, NOT_EQUAL
 from shardc.utils.const.types import INT
+from shardc.utils.errors.symbols import ShardError_UninitializedConstant
 
 class CodeGenerator:
     def __init__(self, arch: Architecture):
@@ -106,10 +106,22 @@ class CodeGenerator:
         node.group.accept(self)
 
     def visit_NodeVariableDecl(self, node: NodeVariableDecl) -> None:
-        if isinstance(node.val, NodeValue):
-            value = node.val.value
-            self.arch.define_variable(node.name, node.datatype, value)
-        else:
-            node.val.accept(self)
-            self.arch.store_addr(node.name)
-            self.arch.define_variable(node.name, node.datatype, 0)
+        value = None
+
+        if node.val is not None:
+            if isinstance(node.val, NodeValue):
+                value = node.val.value
+            else:
+                value = getattr(node.val, "val", None)
+
+        if node.prefix == "var":
+            if value is None:
+                self.arch.define_buffer(node.name, node.datatype, 1)
+            else:
+                self.arch.define_variable(node.name, node.datatype, value)
+
+        elif node.prefix == "const":
+            if value is None:
+                ShardError_UninitializedConstant(node.name).display()
+            else:
+                self.arch.define_const(node.name, node.datatype, value)

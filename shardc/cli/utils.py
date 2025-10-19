@@ -2,6 +2,7 @@ from shardc.backend.codegen.x86_64 import x86_64
 from shardc.backend.compiler import Compiler
 from shardc.backend.visitor import CodeGenerator
 from shardc.frontend.lexer import ShardLexer
+from shardc.frontend.optimizations.constant_folder import ConstantFolder
 from shardc.frontend.parser import ShardParser
 from shardc.frontend.symbols.resolver import SymbolResolver
 from shardc.frontend.symbols.table import SymbolTable
@@ -36,7 +37,7 @@ def compile_file(path: str, output: str="output.asm") -> None:
     check_path(path)
     
     ast = parse_file(path)
-    compiler = Compiler(SymbolResolver(SymbolTable(), TypeTable()), CodeGenerator(x86_64()))
+    compiler = Compiler(ConstantFolder(), SymbolResolver(SymbolTable(), TypeTable()), CodeGenerator(x86_64()))
     for node in ast:
         if node is not None:
             compiler.compile_node(node)

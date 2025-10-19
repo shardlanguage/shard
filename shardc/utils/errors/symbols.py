@@ -8,3 +8,7 @@ class ShardError_SymbolRedefined(ShardError):
 class ShardError_UnknownSymbol(ShardError):
     def __init__(self, name: str):
         super().__init__(ErrorClass.ERROR, f"symbol used but not defined: {name}")
+
+class ShardError_UninitializedConstant(ShardError):
+    def __init__(self, name: str):
+        super().__init__(ErrorClass.ERROR, f"constant not initialized: {name}")

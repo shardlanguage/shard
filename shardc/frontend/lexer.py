@@ -10,6 +10,7 @@ class ShardLexer:
 
     keywords = {
         "var": "VAR",
+        "const": "CONST"
     }
 
     tokens = tuple(keywords.values()) + (

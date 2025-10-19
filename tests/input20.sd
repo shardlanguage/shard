@@ -1,0 +1,22 @@
+// First, we define an initialized variable with a value greater than 0
+// It should be generated in the .data section
+var a: u32 = 5;
+
+// Now, we define an variable with a value of 0
+// It should be generated in the .bss section
+var b: u32 = 0;
+
+// We also define an uninitialized variable, which is a shortcut of var x: T = 0;
+// This one should be generated in .bss too
+var c: u32;
+
+// We declare a constant
+// It should be generated in .rodata
+const A: u32 = 10;
+
+// We declare an uninitialized constant
+// It should be generated in .rodata too
+const B: u32 = 0;
+
+// Now let's see what happens when we declare a constant and assign an expression to it
+const C: u32 = 3 + 4 * 2;

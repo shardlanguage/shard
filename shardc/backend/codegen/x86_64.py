@@ -92,6 +92,24 @@ class x86_64(Architecture):
         }
         self.section_data.append(f"{name}: {sizes[t.size]} {value}")
 
+    def define_buffer(self, name, t, size) -> None:
+        sizes = {
+            8: "resb",
+            16: "resw",
+            32: "resd",
+            64: "resq"
+        }
+        self.section_bss.append(f"{name}: {sizes[t.size]} {size}")
+
+    def define_const(self, name, t, value) -> None:
+        sizes = {
+            8: "db",
+            16: "dw",
+            32: "dd",
+            64: "dq"
+        }
+        self.section_rodata.append(f"{name}: {sizes[t.size]} {value}")
+
     def access_value(self, address) -> None:
         self.section_text.append(f"mov rax, [{address}]")
 

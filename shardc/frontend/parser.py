@@ -121,8 +121,12 @@ class ShardParser:
     def p_declaration_variable(self, p) -> None:
         """
         declaration : prefix ID COLON type EQUAL expression
+                    | prefix ID COLON type
         """
-        p[0] = NodeVariableDecl(p[1], p[2], p[4], p[6])
+        if len(p) == 7:
+            p[0] = NodeVariableDecl(p[1], p[2], p[4], p[6])
+        else:
+            p[0] = NodeVariableDecl(p[1], p[2], p[4], None)
 
     def p_id_access(self, p) -> None:
         """
@@ -133,6 +137,7 @@ class ShardParser:
     def p_prefix(self, p) -> None:
         """
         prefix : VAR
+               | CONST
         """
         p[0] = p[1]
 
