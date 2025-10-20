@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 class Architecture(ABC):
     name: str = "unknown"
     word_size: int = 0
+    accumulator: str = "undefined"
+    register_b: str = "undefined"
 
     def __init__(self):
         self.section_text: list = []
@@ -18,6 +20,9 @@ class Architecture(ABC):
 
     @abstractmethod
     def signed_value(self) -> None: ...
+
+    @abstractmethod
+    def addr_offset(self, addr, offset) -> str: ...
 
     @abstractmethod
     def move_addr(self, addr) -> None: ...

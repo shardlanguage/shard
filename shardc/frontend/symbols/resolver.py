@@ -3,7 +3,6 @@ from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeGro
 from shardc.frontend.symbols.variable import ShardVariable
 from shardc.frontend.symbols.table import SymbolTable
 from shardc.frontend.nodes.node import Node
-from shardc.utils.types.datatype import ShardType
 from shardc.utils.types.table import TypeTable
 
 class SymbolResolver:
@@ -21,6 +20,8 @@ class SymbolResolver:
 
     def resolve_NodeID(self, node: NodeID) -> None:
         symbol = self.symbol_table.get_symbol(node.name)
+        if node.idx:
+            self.resolve_symbols(node.idx)
         node.symbol = symbol
 
     def resolve_NodeUnaryOp(self, node: NodeUnaryOp) -> None:
@@ -31,7 +32,10 @@ class SymbolResolver:
         self.resolve_symbols(node.right)
 
     def resolve_NodeAssignOp(self, node: NodeAssignOp) -> None:
-        symbol = self.symbol_table.get_symbol(node.name)
+        if not isinstance(node.name, NodeID):
+            symbol = self.symbol_table.get_symbol(node.name)
+        else:
+            symbol = self.symbol_table.get_symbol(node.name.name)
         node.symbol = symbol
 
         self.resolve_symbols(node.val)
@@ -40,8 +44,17 @@ class SymbolResolver:
         self.resolve_symbols(node.group)
 
     def resolve_NodeVariableDecl(self, node: NodeVariableDecl) -> None:
-        self.resolve_symbols(node.val)
-        t = self.type_table.get_type(node.t)
-        var = ShardVariable(node.prefix, node.name, t)
+        if node.val is not None:
+            self.resolve_symbols(node.val)
+
+        if not isinstance(node.t, list):
+            t = self.type_table.get_type(node.t)
+            node.datatype = t
+            var = ShardVariable(node.prefix, node.name, t)
+        else:
+            base_type = self.type_table.get_type(node.t[0])
+            size = node.t[1]
+            node.datatype = (base_type, size)
+            var = ShardVariable(node.prefix, node.name, base_type, size)
+            
         self.symbol_table.add_symbol(var)
-        node.datatype = t

@@ -20,7 +20,7 @@ class ShardLexer:
         "EQUAL", "PLUSEQ", "MINUSEQ", "STAREQ", "SLASHEQ", "PERCENTEQ",
         "LSHIFTEQ", "RSHIFTEQ", "AMPERSANDEQ", "PIPEEQ", "CARETEQ", "TILDEEQ",
         "EQEQ", "NOTEQ", "LT", "GT", "LTEQ", "GTEQ",
-        "LPAR", "RPAR", "SEMI", "COLON"
+        "LPAR", "RPAR", "SEMI", "COLON", "LSQB", "RSQB", "COMMA"
     )
 
     t_NUMBER = r'\d+'
@@ -62,6 +62,9 @@ class ShardLexer:
     t_RPAR = r'\)'
     t_SEMI = r';'
     t_COLON = ':'
+    t_LSQB = r'\['
+    t_RSQB = r'\]'
+    t_COMMA = r','
 
     @lex.Token(r'[a-zA-Z_][a-zA-Z0-9_]*')
     def t_ID(self, t):

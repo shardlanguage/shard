@@ -7,7 +7,7 @@ class NodeVariableDecl(Node):
         self.name = name
         self.t = t
         self.val = val
-        self.datatype: ShardType
+        self.datatype: ShardType | None = None
 
     def __repr__(self):
         return f"NodeVariableDecl(prefix={self.prefix}, name={self.name}, t={self.t}, val={self.val}, type={self.datatype})"

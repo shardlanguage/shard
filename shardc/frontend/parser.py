@@ -3,7 +3,7 @@ import ply.yacc as yacc
 
 from shardc.frontend.lexer import ShardLexer
 from shardc.frontend.nodes.declaration import NodeVariableDecl
-from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeGroup, NodeID, NodeUnaryOp, NodeValue
+from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeExpressionList, NodeGroup, NodeID, NodeUnaryOp, NodeValue
 from shardc.utils.const.types import INT
 from shardc.utils.errors.syntax import ShardError_BadSyntax
 
@@ -25,6 +25,7 @@ class ShardParser:
         ("left", "CARET"),
         ("left", "PIPE"),
         ("right", "POS", "NEG", "TILDE"),
+        ("right", "COMMA")
     )
 
     def p_program(self, p) -> None:
@@ -64,7 +65,7 @@ class ShardParser:
         """
         expression : id_access
         """
-        p[0] = NodeID(p[1])
+        p[0] = p[1]
 
     def p_expression_unary(self, p) -> None:
         """
@@ -120,7 +121,7 @@ class ShardParser:
 
     def p_declaration_variable(self, p) -> None:
         """
-        declaration : prefix ID COLON type EQUAL expression
+        declaration : prefix ID COLON type EQUAL variable_initializer
                     | prefix ID COLON type
         """
         if len(p) == 7:
@@ -131,8 +132,12 @@ class ShardParser:
     def p_id_access(self, p) -> None:
         """
         id_access : ID
+                  | ID LSQB expression RSQB
         """
-        p[0] = p[1]
+        if len(p) == 2:
+            p[0] = NodeID(p[1], None)
+        else:
+            p[0] = NodeID(p[1], p[3])
 
     def p_prefix(self, p) -> None:
         """
@@ -144,8 +149,31 @@ class ShardParser:
     def p_type(self, p) -> None:
         """
         type : ID
+             | LSQB ID SEMI expression RSQB
         """
-        p[0] = p[1]
+        p[0] = p[1] if len(p) == 2 else [p[2], p[4]]
+
+    def p_variable_initializer(self, p):
+        """
+        variable_initializer : expression
+                             | expression COMMA expression_list
+        """
+        if len(p) == 2:
+            p[0] = p[1]
+        else:
+            p[0] = NodeExpressionList([p[1]] + p[3].expressions)
+
+    def p_expression_list_single(self, p):
+        """
+        expression_list : expression
+        """
+        p[0] = NodeExpressionList([p[1]])
+
+    def p_expression_list(self, p):
+        """
+        expression_list : expression COMMA expression_list
+        """
+        p[0] = NodeExpressionList([p[1]] + p[3].expressions)
 
     def p_error(self, p) -> None:
         ShardError_BadSyntax(p.value if p else "EOF", p.lexer.lineno).display()

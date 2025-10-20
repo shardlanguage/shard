@@ -1,0 +1,2 @@
+VAR = "var"
+CONST = "const"

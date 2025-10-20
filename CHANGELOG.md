@@ -1,3 +1,11 @@
+## Version 0.0.6
+- Cleaned up code
+- Added `addr_offset(addr, offset)` to class `Architecture`
+- Added static arrays:
+    - declaration: `prefix name: [T; length] = a, b, c, d, ...;`
+    - access: `name[index]`
+- Fixed `NodeX.__repr__()`, where variables were not initialized
+
 ## Version 0.0.5
 - Added uninitialized variables (it is like `var x: T = 0`): `var x: T`
 - Variables initialized with 0 are now generated in the .bss section

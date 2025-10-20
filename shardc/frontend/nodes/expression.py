@@ -10,12 +10,13 @@ class NodeValue(Node):
         return f"NodeValue(value={self.value}, type={self.t})"
 
 class NodeID(Node):
-    def __init__(self, name):
+    def __init__(self, name, idx):
         self.name = name
-        self.symbol: Symbol
+        self.idx = idx
+        self.symbol: Symbol | None = None
 
     def __repr__(self):
-        return f"NodeID(name={self.name}, symbol={self.symbol})"
+        return f"NodeID(name={self.name}, idx={self.idx}, symbol={self.symbol})"
 
 class NodeUnaryOp(Node):
     def __init__(self, op, right):
@@ -41,7 +42,7 @@ class NodeAssignOp(Node):
         self.name = name
         self.op = op
         self.val = val
-        self.symbol: Symbol
+        self.symbol: Symbol | None = None
 
     def __repr__(self):
         return f"NodeAssignOp(name={self.name}, op={self.op}, val={self.val}, symbol={self.symbol})"
@@ -52,3 +53,10 @@ class NodeGroup(Node):
 
     def __repr__(self):
         return f"NodeGroup(group={self.group})"
+
+class NodeExpressionList(Node):
+    def __init__(self, expressions):
+        self.expressions = expressions
+
+    def __repr__(self):
+        return f"NodeExpressionList(expressions={self.expressions})"

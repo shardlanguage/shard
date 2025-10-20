@@ -4,6 +4,8 @@ from shardc.utils.const.comparisons import EQUAL, GT_SIGNED, GT_UNSIGNED, GTQ_SI
 class x86_64(Architecture):
     name = "x86_64"
     word_size = 64
+    accumulator = "rax"
+    register_b = "rbx"
 
     def __init__(self):
         self.section_text = []
@@ -19,6 +21,9 @@ class x86_64(Architecture):
 
     def signed_value(self) -> None:
         self.section_text.append("neg rax")
+
+    def addr_offset(self, addr, offset) -> str:
+        return f"{addr} + {offset}"
 
     def move_addr(self, addr) -> None:
         self.section_text.append(f"mov rax, [{addr}]")

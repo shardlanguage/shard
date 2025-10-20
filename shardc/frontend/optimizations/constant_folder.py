@@ -1,6 +1,7 @@
 from shardc.frontend.nodes.declaration import NodeVariableDecl
-from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeGroup, NodeUnaryOp, NodeValue
+from shardc.frontend.nodes.expression import NodeAssignOp, NodeBinaryOp, NodeGroup, NodeID, NodeUnaryOp, NodeValue
 from shardc.frontend.nodes.node import Node
+import operator
 
 class ConstantFolder:
     def __init__(self):
@@ -16,6 +17,11 @@ class ConstantFolder:
 
     def fold_NodeValue(self, node: NodeValue):
         return node.value
+
+    def fold_NodeID(self, node: NodeID):
+        if node.idx is not None:
+            idx = self.fold_constants(node.idx)
+            return idx
 
     def fold_NodeUnaryOp(self, node: NodeUnaryOp):
         _right = self.fold_constants(node.right)
@@ -45,25 +51,25 @@ class ConstantFolder:
         right = int(_right)
 
         table = {
-            '+': left + right,
-            '-': left - right,
-            '*': left * right,
-            '/': left // right,
-            '%': left % right,
-            '<<': left << right,
-            '>>': left >> right,
-            '&': left & right,
-            '|': left | right,
-            '^': left ^ right,
-            '==': int(left == right),
-            '!=': int(left != right),
-            '<': int(left < right),
-            '>': int(left > right),
-            '<=': int(left <= right),
-            '>=': int(left >= right)
+            '+': operator.add,
+            '-': operator.sub,
+            '*': operator.mul,
+            '/': operator.floordiv,
+            '%': operator.mod,
+            '<<': operator.lshift,
+            '>>': operator.rshift,
+            '&': operator.and_,
+            '|': operator.or_,
+            '^': operator.xor,
+            '==': operator.eq,
+            '!=': operator.ne,
+            '<': operator.lt,
+            '>': operator.gt,
+            '<=': operator.le,
+            '>=': operator.ge
         }
 
-        node.val = table[node.op]
+        node.val = table[node.op](left, right)
         return node.val
 
     def fold_NodeAssignOp(self, node: NodeAssignOp):
@@ -76,4 +82,6 @@ class ConstantFolder:
 
     def fold_NodeVariableDecl(self, node: NodeVariableDecl):
         val = self.fold_constants(node.val)
+        if isinstance(node.t, list):
+            return [self.fold_constants(node.t[1]), val]
         return val
