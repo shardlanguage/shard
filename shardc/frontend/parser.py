@@ -33,8 +33,7 @@ class ShardParser:
             ("left", "PLUS", "MINUS"),
             ("left", "STAR", "SLASH", "PERCENT"),
             ("right", "UPLUS", "UMINUS", "TILDE", "NOT", "REF", "SIZEOF"),
-            ("right", "AS"),
-            ("right", "EQUAL", "PLUSEQ", "MINUSEQ", "STAREQ", "SLASHEQ", "PERCENTEQ", "SHIFTLEQ", "SHIFTREQ", "AMPERSANDEQ", "PIPEEQ", "CARETEQ", "TILDEEQ")
+            ("right", "AS", "EQUAL", "PLUSEQ", "MINUSEQ", "STAREQ", "SLASHEQ", "PERCENTEQ", "SHIFTLEQ", "SHIFTREQ", "AMPERSANDEQ", "PIPEEQ", "CARETEQ", "TILDEEQ")
         )
 
     def p_program(self, p):
