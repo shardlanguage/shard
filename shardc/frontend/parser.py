@@ -2,7 +2,7 @@ from typing import Any
 import ply.yacc as yacc
 
 from shardc.frontend.lexer import ShardLexer
-from shardc.frontend.tree.codeblocks import NodeCodeBlock
+from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeStructureBody
 from shardc.frontend.tree.condition_struct import NodeCondition, NodeElif, NodeElse, NodeIf
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
 from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeNumber, NodeString, NodeUnaryOp
@@ -264,7 +264,7 @@ class ShardParser:
 
     def p_structure_definition(self, p):
         """
-        structure_definition : STRUCT ID codeblock
+        structure_definition : STRUCT ID structure_body
         """
         p[0] = NodeStructureDefinition(p[2], p[3])
 
@@ -378,6 +378,12 @@ class ShardParser:
         else : ELSE codeblock
         """
         p[0] = NodeElse(p[2])
+
+    def p_structure_body(self, p):
+        """
+        structure_body : LBRACE statement_list RBRACE
+        """
+        p[0] = NodeStructureBody(p[2])
 
     def p_error(self, p) -> None:
         if p:

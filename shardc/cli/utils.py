@@ -56,6 +56,8 @@ def compile_file(file: str, lang: str="c", output: str="output", keep_all: bool=
 
     preprocessed = preprocess_file(file)
     ast = parse_file(preprocessed)
+    if not keep_all:
+        os.remove(preprocessed)
 
     lang_table = {
         "c": LangC,
@@ -79,9 +81,6 @@ def compile_file(file: str, lang: str="c", output: str="output", keep_all: bool=
 
     with open(output_filename, 'w', encoding="utf-8") as f:
         f.write('\n'.join(compiler.code))
-
-    if not keep_all:
-        os.remove(preprocessed)
 
     return output_filename
 

@@ -46,7 +46,7 @@ class ContentVerifier(Visitor):
         ]
 
         for nd in node.body.content:
-            if nd not in allowed_nodes:
+            if type(nd) not in allowed_nodes:
                 ShardError_InvalidStructContent(nd.__class__.__name__).display()
 
     def verify_NodeFunctionDefinition(self, node: NodeFunctionDefinition):

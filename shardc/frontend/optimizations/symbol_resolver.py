@@ -3,7 +3,7 @@ from shardc.frontend.symbols.function import ShardFunction
 from shardc.frontend.symbols.structure import ShardStructure
 from shardc.frontend.symbols.table import SymbolTable
 from shardc.frontend.symbols.variable import ShardVariable
-from shardc.frontend.tree.codeblocks import NodeCodeBlock
+from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeStructureBody
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
 from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeUnaryOp
 from shardc.frontend.tree.condition_struct import NodeIf, NodeElif, NodeElse, NodeCondition
@@ -50,21 +50,33 @@ class SymbolResolver(Visitor):
         self.resolve_symbol(node.left)
         self.resolve_symbol(node.right)
 
+    def resolve_NodeFieldAccess(self, node: NodeFieldAccess) -> None:
+        self.resolve_symbol(node.instance)
+        instance_symbol = self.symbol_table.get_symbol(node.instance.name)
+        node.instance.symbol = instance_symbol
+
+        def _find_structure(typename: str):
+            table = self.symbol_table
+            while table is not None:
+                for sym in table.table.values():
+                    if isinstance(sym, ShardStructure) and sym.name == typename:
+                        return sym
+                table = getattr(table, "parent", None)
+            return None
+
+        struct = _find_structure(instance_symbol.t)
+
+        field_name = node.field.name
+        field_symbol = struct.symbol_table.get_symbol(field_name)
+
+        node.field.symbol = field_symbol
+        node.symbol = field_symbol
+
     def resolve_NodeAssignmentOp(self, node: NodeAssignmentOp) -> None:
         symbol = self.symbol_table.get_symbol(node.name)
         node.symbol = symbol
 
         self.resolve_symbol(node.value)
-
-    def resolve_NodeFieldAccess(self, node: NodeFieldAccess) -> None:
-        symbol = self.symbol_table.get_symbol(node.instance)
-        node.symbol = symbol
-
-        if isinstance(node.symbol, ShardStructure):
-            old_table = self.symbol_table
-            self.symbol_table = node.symbol.symbol_table
-            self.resolve_symbol(node.field)
-            self.symbol_table = old_table
 
     def resolve_NodeArrayAssignmentOp(self, node: NodeArrayAssignmentOp) -> None:
         symbol = self.symbol_table.get_symbol(node.name)
@@ -111,6 +123,10 @@ class SymbolResolver(Visitor):
         for stmt in node.content:
             self.resolve_symbol(stmt)
         self.symbol_table = old_table
+
+    def resolve_NodeStructureBody(self, node: NodeStructureBody) -> None:
+        for stmt in node.content:
+            self.resolve_symbol(stmt)
 
     def resolve_NodeIf(self, node: NodeIf) -> None:
         self.resolve_symbol(node.branch)
@@ -163,10 +179,10 @@ class SymbolResolver(Visitor):
         local_table = SymbolTable(parent=self.symbol_table)
         old_table = self.symbol_table
 
+        self.symbol_table = local_table
+        self.resolve_symbol(node.body)
+        self.symbol_table = old_table
+
         structure = ShardStructure(node.name, local_table)
         self.symbol_table.add_symbol(structure)
         node.symbol = structure
-
-        self.resolve_symbol(node.body)
-
-        self.symbol_table = old_table

@@ -1,7 +1,7 @@
 from typing import Any
 from shardc.backend.codegen.lang import ProgrammingLanguage
 from shardc.backend.visitor import Visitor
-from shardc.frontend.tree.codeblocks import NodeCodeBlock
+from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeStructureBody
 from shardc.frontend.tree.condition_struct import NodeCondition, NodeElif, NodeElse, NodeIf
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
 from shardc.frontend.tree.flow_control import NodeBreak, NodeContinue, NodeReturn
@@ -41,6 +41,12 @@ class CodeGenerator(Visitor):
         index = node.index.accept(self)
 
         return self.lang.access_array(node.name, index)
+
+    def generate_NodeFieldAccess(self, node: NodeFieldAccess) -> str:
+        instance = node.instance.accept(self)
+        field = node.field.accept(self)
+
+        return self.lang.access_structure_field(instance, field)
         
     def generate_NodeFunctionCall(self, node: NodeFunctionCall) -> str:
         parameters = []
@@ -206,6 +212,14 @@ class CodeGenerator(Visitor):
             return self.lang.declare_array(prefix, name, t, length, values)
 
     def generate_NodeCodeBlock(self, node: NodeCodeBlock) -> str:
+        content = []
+        for stmt in node.content:
+            if stmt is not None:
+                content.append(stmt.accept(self))
+
+        return self.lang.codeblock(content)
+
+    def generate_NodeStructureBody(self, node: NodeStructureBody) -> str:
         content = []
         for stmt in node.content:
             if stmt is not None:

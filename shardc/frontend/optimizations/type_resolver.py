@@ -1,6 +1,6 @@
 from typing import Any
 from shardc.backend.visitor import Visitor
-from shardc.frontend.tree.codeblocks import NodeCodeBlock
+from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeStructureBody
 from shardc.frontend.tree.condition_struct import NodeCondition, NodeElif, NodeElse, NodeIf
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
 from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeIDAccess, NodeUnaryOp
@@ -107,6 +107,10 @@ class TypeResolver(Visitor):
         for stmt in node.content:
             self.resolve_type(stmt)
         self.type_table = old_table
+
+    def resolve_NodeStructureBody(self, node: NodeStructureBody) -> None:
+        for stmt in node.content:
+            self.resolve_type(stmt)
 
     def resolve_NodeIf(self, node: NodeIf) -> None:
         self.resolve_type(node.branch)
