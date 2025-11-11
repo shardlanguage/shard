@@ -86,7 +86,8 @@ class TypeResolver(Visitor):
 
     def resolve_NodeVariableDeclaration(self, node: NodeVariableDeclaration) -> None:
         t: Any = node.t.accept(self)
-        shardt = self.type_table.get_type(t.name)
+        base = self.type_table.get_type(t.name)
+        shardt = base.clone()
         if isinstance(node.t, NodeArrayType):
             shardt.name = f"{node.t.name}[{node.t.length}]"
             shardt.length = node.t.length
