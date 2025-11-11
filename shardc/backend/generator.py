@@ -200,10 +200,6 @@ class CodeGenerator(Visitor):
         t = node.shardt.c if node.shardt is not None else node.t
 
         if len(values) == 0:
-            if isinstance(node.t, NodeDereferenceType):
-                if value is None:
-                    return self.lang.declare_empty_pointer(prefix, node.t.nderefs, name, t)
-                return self.lang.declare_pointer(prefix, node.t.nderefs, name, t, value)
             if isinstance(node.t, NodeArrayType):
                 length = node.t.length.accept(self)
                 return self.lang.declare_empty_array(prefix, name, t, length)

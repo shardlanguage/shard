@@ -231,17 +231,11 @@ class LangC(ProgrammingLanguage):
     def declare_array(self, prefix, name, t, length, content) -> str:
         return f"{prefix} {t} {name}[{length}] = {{ {', '.join(content)} }}"
 
-    def declare_pointer(self, prefix, derefs, name, t, val) -> str:
-        return f"{prefix} {t} {'*'*derefs}{name} = {val}"
-
     def declare_empty_variable(self, prefix, name, t) -> str:
         return f"{prefix} {t} {name}"
 
     def declare_empty_array(self, prefix, name, t, length) -> str:
         return f"{prefix} {t} {name}[{length}]"
-
-    def declare_empty_pointer(self, prefix, derefs, name, t) -> str:
-        return f"{prefix} {t} {'*'*derefs}{name}"
 
     def declare_extern_symbol(self, symbol) -> str:
         return f"extern {symbol}"

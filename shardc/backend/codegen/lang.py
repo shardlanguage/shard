@@ -220,9 +220,6 @@ class ProgrammingLanguage(ABC):
     def declare_array(self, prefix, name, t, length, content) -> str: ...
 
     @abstractmethod
-    def declare_pointer(self, prefix, derefs, name, t, val) -> str: ...
-
-    @abstractmethod
     def declare_empty_variable(self, prefix, name, t) -> str: ...
 
     @abstractmethod
@@ -230,9 +227,6 @@ class ProgrammingLanguage(ABC):
 
     @abstractmethod
     def declare_extern_symbol(self, symbol) -> str: ...
-
-    @abstractmethod
-    def declare_empty_pointer(self, prefix, derefs, name, t) -> str: ...
 
     @abstractmethod
     def codeblock(self, content) -> str: ...
