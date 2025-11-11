@@ -89,12 +89,15 @@ class TypeResolver(Visitor):
         t: Any = node.t.accept(self)
         shardt = self.type_table.get_type(t.name)
         if isinstance(node.t, NodeArrayType):
-            shardt.name = f"[{node.t.length}]{node.t.name}"
+            shardt.name = f"{node.t.name}[{node.t.length}]"
             shardt.length = node.t.length
             if shardt.name not in self.type_table.table:
                 self.type_table.add_array_type(shardt)
-        if isinstance(node.t, NodeDereferenceType):
-            shardt.name = f"{'*'*node.t.nderefs}{node.t.name}"
+
+        elif isinstance(node.t, NodeDereferenceType):
+            base = self.type_table.get_type(node.t.name)
+            shardt.name = f"{base.name}{'*'*node.t.nderefs}"
+            shardt.c = f"{base.c}{'*'*node.t.nderefs}"
             if shardt.name not in self.type_table.table:
                 self.type_table.add_deref_type(shardt)
         node.shardt = shardt
@@ -154,12 +157,17 @@ class TypeResolver(Visitor):
             t: Any = node.t.accept(self)
             shardt = self.type_table.get_type(t.name)
             if isinstance(node.t, NodeArrayType):
-                shardt.name = f"[{node.t.length}]{node.t.name}"
+                base = self.type_table.get_type(node.t.name)
+                shardt.name = f"[{node.t.length}]{base.name}"
+                shardt.c = f"{base.c}[{node.t.length}]"
                 shardt.length = node.t.length
                 if shardt.name not in self.type_table.table:
                     self.type_table.add_array_type(shardt)
-            if isinstance(node.t, NodeDereferenceType):
-                shardt.name = f"{'*'*node.t.nderefs}{node.t.name}"
+
+            elif isinstance(node.t, NodeDereferenceType):
+                base = self.type_table.get_type(node.t.name)
+                shardt.name = f"{base.name}{'*'*node.t.nderefs}"
+                shardt.c = f"{base.c}{'*'*node.t.nderefs}"
                 if shardt.name not in self.type_table.table:
                     self.type_table.add_deref_type(shardt)
             node.shardt = shardt

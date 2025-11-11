@@ -11,7 +11,7 @@ from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeL
 from shardc.frontend.tree.node import Node
 from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeNumber, NodeString, NodeUnaryOp
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
-from shardc.frontend.tree.types import Node, NodeDereferenceType, NodeNewType, NodeTypeAlias
+from shardc.frontend.tree.types import Node, NodeArrayType, NodeDereferenceType, NodeNewType, NodeTypeAlias
 from shardc.utils.constants.operators import OP_BITWISE_AND, OP_BITWISE_NOT, OP_BITWISE_OR, OP_BITWISE_XOR, OP_DIVIDE, OP_GREATER_THAN, OP_GREATER_THAN_OR_EQUAL, OP_ISEQUAL, OP_ISNOTEQUAL, OP_LESSER_THAN, OP_LESSER_THAN_OR_EQUAL, OP_LOGICAL_AND, OP_LOGICAL_NOT, OP_LOGICAL_OR, OP_MINUS, OP_MODULO, OP_PLUS, OP_REFERENCE, OP_SET, OP_SET_ADD, OP_SET_AND, OP_SET_DIV, OP_SET_MOD, OP_SET_MUL, OP_SET_NOT, OP_SET_OR, OP_SET_SHL, OP_SET_SHR, OP_SET_SUB, OP_SET_XOR, OP_SHIFT_LEFT, OP_SHIFT_RIGHT, OP_SIZEOF, OP_TIMES
 from shardc.utils.constants.prefixes import C_CONST, C_VAR, S_CONST, S_VAR
 
@@ -183,6 +183,7 @@ class CodeGenerator(Visitor):
     def generate_NodeVariableDeclaration(self, node: NodeVariableDeclaration) -> str:
         values = []
         value = None
+        
         if isinstance(node.value, list):
             for v in node.value:
                 values.append(v.accept(self))
@@ -203,6 +204,9 @@ class CodeGenerator(Visitor):
                 if value is None:
                     return self.lang.declare_empty_pointer(prefix, node.t.nderefs, name, t)
                 return self.lang.declare_pointer(prefix, node.t.nderefs, name, t, value)
+            if isinstance(node.t, NodeArrayType):
+                length = node.t.length.accept(self)
+                return self.lang.declare_empty_array(prefix, name, t, length)
             if value is None:
                 return self.lang.declare_empty_variable(prefix, name, t)
             return self.lang.declare_variable(prefix, name, t, value)
