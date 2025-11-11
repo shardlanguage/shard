@@ -168,7 +168,11 @@ class CodeGenerator(Visitor):
 
     def generate_NodeCast(self, node: NodeCast) -> str:
         value = node.value.accept(self)
-        t = node.shardt.c if node.shardt is not None else node.t
+
+        if node.shardt is not None:
+            t = node.shardt.c
+        else:
+            t = node.t
 
         return self.lang.cast(value, t)
 
