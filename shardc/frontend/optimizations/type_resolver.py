@@ -5,7 +5,7 @@ from shardc.frontend.tree.condition_struct import NodeCondition, NodeElif, NodeE
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
 from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeIDAccess, NodeUnaryOp
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
-from shardc.frontend.tree.loop_struct import NodeLoopForever, NodeLoopUntil, NodeLoopWhile
+from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopUntil, NodeLoopWhile
 from shardc.frontend.tree.node import Node
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
 from shardc.frontend.tree.types import NodeArrayType, NodeDereferenceType, NodeNewType, NodeT, NodeType, NodeTypeAlias
@@ -141,6 +141,12 @@ class TypeResolver(Visitor):
         self.resolve_type(node.branch)
 
     def resolve_NodeLoopUntil(self, node: NodeLoopUntil) -> None:
+        self.resolve_type(node.branch)
+
+    def resolve_NodeLoopFor(self, node: NodeLoopFor) -> None:
+        self.resolve_type(node.declaration)
+        self.resolve_type(node.condition)
+        self.resolve_type(node.update)
         self.resolve_type(node.branch)
 
     def resolve_NodeFunctionDefinition(self, node: NodeFunctionDefinition) -> None:

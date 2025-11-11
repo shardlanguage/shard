@@ -7,7 +7,7 @@ from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariabl
 from shardc.frontend.tree.flow_control import NodeBreak, NodeContinue, NodeReturn
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
 from shardc.frontend.tree.inline import NodeInlineC
-from shardc.frontend.tree.loop_struct import NodeLoopForever, NodeLoopUntil, NodeLoopWhile
+from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopUntil, NodeLoopWhile
 from shardc.frontend.tree.node import Node
 from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeNumber, NodeString, NodeUnaryOp
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
@@ -279,6 +279,13 @@ class CodeGenerator(Visitor):
         condition = node.condition.accept(self)
         branch = node.branch.accept(self)
         return self.lang.until_loop(condition, branch)
+
+    def generate_NodeLoopFor(self, node: NodeLoopFor) -> str:
+        declaration = node.declaration.accept(self)
+        check = node.condition.accept(self)
+        update = node.update.accept(self)
+        branch = node.branch.accept(self)
+        return self.lang.for_loop(declaration, check, update, branch)
 
     def generate_NodeBreak(self, node: NodeBreak) -> str:
         return self.lang.break_loop()

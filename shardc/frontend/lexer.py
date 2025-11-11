@@ -28,7 +28,8 @@ class ShardLexer:
             "_c_": "C",
             "extern": "EXTERN",
             "type": "TYPE",
-            "newtype": "NEWTYPE"
+            "newtype": "NEWTYPE",
+            "for": "FOR"
         }
         self.tokens = (
             "NUMBER", "ID", "CHAR", "STRING",

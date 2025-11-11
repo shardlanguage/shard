@@ -9,7 +9,7 @@ from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmen
 from shardc.frontend.tree.condition_struct import NodeIf, NodeElif, NodeElse, NodeCondition
 from shardc.frontend.tree.flow_control import NodeReturn
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
-from shardc.frontend.tree.loop_struct import NodeLoopForever, NodeLoopWhile, NodeLoopUntil
+from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopWhile, NodeLoopUntil
 from shardc.frontend.tree.node import Node
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
 
@@ -152,6 +152,12 @@ class SymbolResolver(Visitor):
         self.resolve_symbol(node.branch)
 
     def resolve_NodeLoopUntil(self, node: NodeLoopUntil) -> None:
+        self.resolve_symbol(node.branch)
+
+    def resolve_NodeLoopFor(self, node: NodeLoopFor) -> None:
+        self.resolve_symbol(node.declaration)
+        self.resolve_symbol(node.condition)
+        self.resolve_symbol(node.update)
         self.resolve_symbol(node.branch)
 
     def resolve_NodeReturn(self, node: NodeReturn) -> None:

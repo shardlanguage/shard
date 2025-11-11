@@ -273,6 +273,9 @@ class LangC(ProgrammingLanguage):
     def until_loop(self, condition, branch) -> str:
         return f"while (!({condition})) {branch}"
 
+    def for_loop(self, decl, check, update, branch) -> str:
+        return f"for ({decl}; {check}; {update}) {branch}"
+
     def break_loop(self) -> str:
         return "break"
 

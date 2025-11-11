@@ -256,6 +256,9 @@ class ProgrammingLanguage(ABC):
     def until_loop(self, condition, branch) -> str: ...
 
     @abstractmethod
+    def for_loop(self, decl, check, update, branch) -> str: ...
+
+    @abstractmethod
     def break_loop(self) -> str: ...
 
     @abstractmethod

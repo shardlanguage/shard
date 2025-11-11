@@ -9,7 +9,7 @@ from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmen
 from shardc.frontend.tree.flow_control import NodeBreak, NodeContinue, NodeReturn
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
 from shardc.frontend.tree.inline import NodeInlineC
-from shardc.frontend.tree.loop_struct import NodeLoopForever, NodeLoopUntil, NodeLoopWhile
+from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopUntil, NodeLoopWhile
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
 from shardc.frontend.tree.types import NodeArrayType, NodeDereferenceType, NodeNewType, NodeType, NodeTypeAlias
 from shardc.utils.constants.keywords import KW_WHILE
@@ -221,6 +221,12 @@ class ShardParser:
                 p[0] = NodeLoopWhile(p[2], p[3])
             else:
                 p[0] = NodeLoopUntil(p[2], p[3])
+
+    def p_loop_structure_for(self, p):
+        """
+        loop_structure : FOR declaration SEMI expression SEMI expression codeblock
+        """
+        p[0] = NodeLoopFor(p[2], p[4], p[6], p[7])
 
     def p_flow_control_break(self, p):
         """
