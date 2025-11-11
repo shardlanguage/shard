@@ -78,6 +78,7 @@ class ShardPreProcessor:
         local_spp.process()
 
         self.symbol_table.update(local_spp.symbol_table)
+        self.macros.extend(local_spp.macros)
         self.output = local_spp.output + self.output
 
     def execute_message(self, text: str) -> None:
