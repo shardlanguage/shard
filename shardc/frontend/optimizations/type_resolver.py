@@ -70,14 +70,18 @@ class TypeResolver(Visitor):
         shardt = base.clone()
 
         if isinstance(node.t, NodeArrayType):
-            shardt.name = f"[{node.t.length}]{base.name}"
-            shardt.c = f"{base.c}[{node.t.length}]"
+            shardt.name = f"{node.t.name}[{node.t.length}]"
             shardt.length = node.t.length
             if shardt.name not in self.type_table.table:
                 self.type_table.add_array_type(shardt)
 
         elif isinstance(node.t, NodeDereferenceType):
-            shardt.name = f"{base.name}{'*'*node.t.nderefs}"
+            base = self.type_table.get_type(node.t.name)
+            n_stars = node.t.nderefs
+            if base.c.endswith('*'):
+                n_stars -= base.c.count('*')
+            shardt.name = f"{base.name}{'*'*max(n_stars,0)}"
+            shardt.c = f"{base.c}{'*'*max(n_stars,0)}"
             if shardt.name not in self.type_table.table:
                 self.type_table.add_deref_type(shardt)
 
@@ -158,7 +162,9 @@ class TypeResolver(Visitor):
     def resolve_NodeFunctionDefinition(self, node: NodeFunctionDefinition) -> None:
         if node.t is not None:
             t: Any = node.t.accept(self)
-            shardt = self.type_table.get_type(t.name)
+            base = self.type_table.get_type(t.name)
+            shardt = base.clone()
+
             if isinstance(node.t, NodeArrayType):
                 base = self.type_table.get_type(node.t.name)
                 shardt.name = f"[{node.t.length}]{base.name}"
