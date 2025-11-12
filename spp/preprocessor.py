@@ -71,15 +71,16 @@ class ShardPreProcessor:
 
         project_root = self.find_root()
         toinc = f"{project_root}/{file}"
-
         self.included_files.append(file)
 
         local_spp = ShardPreProcessor(toinc)
+        local_spp.included_files = self.included_files
         local_spp.process()
 
         self.symbol_table.update(local_spp.symbol_table)
         self.macros.extend(local_spp.macros)
-        self.output = local_spp.output + self.output
+
+        self.output.extend(local_spp.output)
 
     def execute_message(self, text: str) -> None:
         print(f"{text}")
