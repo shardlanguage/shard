@@ -1,5 +1,6 @@
 from typing import Any
 import ply.yacc as yacc
+import codecs
 
 from shardc.frontend.lexer import ShardLexer
 from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeStructureBody
@@ -85,7 +86,9 @@ class ShardParser:
         """
         expression : CHAR
         """
-        p[0] = NodeNumber(str(ord(p[1][1:-1])))
+        s = p[1][1:-1]
+        char = codecs.decode(s, "unicode_escape")
+        p[0] = NodeNumber(ord(char))
 
     def p_expression_string(self, p):
         """
