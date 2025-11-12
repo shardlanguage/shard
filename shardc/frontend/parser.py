@@ -47,7 +47,10 @@ class ShardParser:
         statement_list_opt : statement_list
                            |
         """
-        p[0] = p[1]
+        if len(p) == 2:
+            p[0] = p[1]
+        else:
+            p[0] = []
 
     def p_statement_list(self, p):
         """
@@ -279,7 +282,6 @@ class ShardParser:
         """
         p[0] = NodeInlineC(p[2])
 
-
     def p_declaration_extern(self, p):
         """
         extern_declaration : EXTERN declaration
@@ -386,7 +388,7 @@ class ShardParser:
 
     def p_structure_body(self, p):
         """
-        structure_body : LBRACE statement_list RBRACE
+        structure_body : LBRACE statement_list_opt RBRACE
         """
         p[0] = NodeStructureBody(p[2])
 
