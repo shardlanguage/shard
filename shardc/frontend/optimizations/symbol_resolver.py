@@ -1,15 +1,17 @@
 from shardc.backend.visitor import Visitor
 from shardc.frontend.symbols.function import ShardFunction
+from shardc.frontend.symbols.namespace import ShardNamespace
 from shardc.frontend.symbols.structure import ShardStructure
 from shardc.frontend.symbols.table import SymbolTable
 from shardc.frontend.symbols.variable import ShardVariable
-from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeStructureBody
+from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeNamespaceBody, NodeStructureBody
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
-from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeUnaryOp
+from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeNamespaceAccess, NodeNamespaceAssignmentOp, NodeUnaryOp
 from shardc.frontend.tree.condition_struct import NodeIf, NodeElif, NodeElse, NodeCondition
 from shardc.frontend.tree.flow_control import NodeReturn
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
 from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopWhile, NodeLoopUntil
+from shardc.frontend.tree.namespace_def import NodeNamespaceDefinition
 from shardc.frontend.tree.node import Node
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
 
@@ -26,6 +28,39 @@ class SymbolResolver(Visitor):
             if node is not None:
                 node.accept(self)
 
+    def _resolve_scoped_name(self, node: NodeNamespaceAccess) -> list[str]:
+        parts = []
+
+        if isinstance(node.namespace, NodeIDAccess):
+            parts.append(node.namespace.name)
+        elif isinstance(node.namespace, NodeNamespaceAccess):
+            parts.extend(self._resolve_scoped_name(node.namespace))
+        else:
+            parts.append(str(node.namespace))
+
+        if isinstance(node.sym, NodeIDAccess):
+            parts.append(node.sym.name)
+        elif isinstance(node.sym, NodeNamespaceAccess):
+            parts.extend(self._resolve_scoped_name(node.sym))
+        else:
+            parts.append(str(node.sym))
+
+        return parts
+
+    def _get_scoped_symbol(self, full_name: str):
+        parts = full_name.split("::")
+        table = self.symbol_table.get_root()
+        symbol = None
+
+        for part in parts:
+            symbol = table.get_symbol(part, error=False)
+            if symbol is None:
+                return None
+            if isinstance(symbol, ShardNamespace):
+                table = symbol.symbol_table
+
+        return symbol
+
     def resolve_NodeIDAccess(self, node: NodeIDAccess) -> None:
         symbol = self.symbol_table.get_symbol(node.name)
         node.symbol = symbol
@@ -35,20 +70,6 @@ class SymbolResolver(Visitor):
         node.symbol = symbol
 
         self.resolve_symbol(node.index)
-
-    def resolve_NodeFunctionCall(self, node: NodeFunctionCall) -> None:
-        symbol = self.symbol_table.get_symbol(node.name)
-        node.symbol = symbol
-
-        for param in node.parameters:
-            self.resolve_symbol(param)
-
-    def resolve_NodeUnaryOp(self, node: NodeUnaryOp) -> None:
-        self.resolve_symbol(node.right)
-
-    def resolve_NodeBinaryOp(self, node: NodeBinaryOp) -> None:
-        self.resolve_symbol(node.left)
-        self.resolve_symbol(node.right)
 
     def resolve_NodeFieldAccess(self, node: NodeFieldAccess) -> None:
         self.resolve_symbol(node.instance)
@@ -71,6 +92,36 @@ class SymbolResolver(Visitor):
 
         node.field.symbol = field_symbol
         node.symbol = field_symbol
+
+    def resolve_NodeNamespaceAccess(self, node: NodeNamespaceAccess) -> None:
+        path = self._resolve_scoped_name(node)
+        table = self.symbol_table
+        symbol = None
+        for part in path:
+            symbol = table.get_symbol(part, error=False)
+            if symbol is None:
+                break
+            if hasattr(symbol, "symbol_table"):
+                table = symbol.symbol_table
+        node.symbol = symbol
+        if isinstance(node.sym, NodeIDAccess):
+            node.sym.symbol = symbol
+
+    def resolve_NodeFunctionCall(self, node: NodeFunctionCall):
+        node.name.accept(self)
+        target = node.name.symbol
+
+        node.symbol = target
+
+        for p in node.parameters:
+            self.resolve_symbol(p)
+
+    def resolve_NodeUnaryOp(self, node: NodeUnaryOp) -> None:
+        self.resolve_symbol(node.right)
+
+    def resolve_NodeBinaryOp(self, node: NodeBinaryOp) -> None:
+        self.resolve_symbol(node.left)
+        self.resolve_symbol(node.right)
 
     def resolve_NodeAssignmentOp(self, node: NodeAssignmentOp) -> None:
         symbol = self.symbol_table.get_symbol(node.name)
@@ -98,6 +149,20 @@ class SymbolResolver(Visitor):
             self.symbol_table = old_table
 
         self.resolve_symbol(node.value)
+
+    def resolve_NodeNamespaceAssignmentOp(self, node: NodeNamespaceAssignmentOp) -> None:
+        self.resolve_symbol(node.value)
+
+        path = self._resolve_scoped_name(node.namespace)
+        table = self.symbol_table
+        target = None
+
+        for part in path:
+            target = table.get_symbol(part, error=False)
+            if hasattr(target, "symbol_table"):
+                table = target.symbol_table
+
+        node.symbol = target
 
     def resolve_NodeCast(self, node: NodeCast) -> None:
         self.resolve_symbol(node.value)
@@ -127,6 +192,11 @@ class SymbolResolver(Visitor):
     def resolve_NodeStructureBody(self, node: NodeStructureBody) -> None:
         for stmt in node.content:
             self.resolve_symbol(stmt)
+
+    def resolve_NodeNamespaceBody(self, node: NodeNamespaceBody) -> None:
+        for stmt in node.content:
+            if not isinstance(stmt, NodeNamespaceDefinition):
+                self.resolve_symbol(stmt)
 
     def resolve_NodeIf(self, node: NodeIf) -> None:
         self.resolve_symbol(node.branch)
@@ -192,3 +262,22 @@ class SymbolResolver(Visitor):
         structure = ShardStructure(node.name, local_table)
         self.symbol_table.add_symbol(structure)
         node.symbol = structure
+
+    def resolve_NodeNamespaceDefinition(self, node: NodeNamespaceDefinition) -> None:
+        existing = self.symbol_table.get_symbol(node.name, error=False)
+        
+        if isinstance(existing, ShardNamespace):
+            namespace = existing
+            local_table = namespace.symbol_table
+        else:
+            local_table = SymbolTable(parent=self.symbol_table)
+            namespace = ShardNamespace(node.name, local_table)
+            self.symbol_table.add_symbol(namespace, check=False)
+
+        old_table = self.symbol_table
+        self.symbol_table = local_table
+        self.resolve_symbol(node.content)
+        self.symbol_table = old_table
+
+        namespace.symbol_table = old_table
+        node.symbol = namespace

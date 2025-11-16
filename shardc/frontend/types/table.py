@@ -34,9 +34,10 @@ class TypeTable:
             S_USIZE: ShardType(S_USIZE, C_USIZE)
         }
 
-    def add_type(self, t: ShardType) -> None:
-        if t.name in self.table:
-            ShardError_TypeRedefined(t.name).display()
+    def add_type(self, t: ShardType, check: bool=True) -> None:
+        if check:
+            if t.name in self.table:
+                ShardError_TypeRedefined(t.name).display()
 
         self.table[t.name] = t
 

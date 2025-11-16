@@ -1,0 +1,2 @@
+SYM_DOT = '.'
+SYM_COLON_BLOCK = '::'

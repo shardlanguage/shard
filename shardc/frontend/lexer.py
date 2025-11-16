@@ -29,7 +29,8 @@ class ShardLexer:
             "extern": "EXTERN",
             "type": "TYPE",
             "newtype": "NEWTYPE",
-            "for": "FOR"
+            "for": "FOR",
+            "namespace": "NAMESPACE"
         }
         self.tokens = (
             "NUMBER", "ID", "CHAR", "STRING",
@@ -38,7 +39,7 @@ class ShardLexer:
             "EQEQ", "NOTEQ", "LT", "GT", "LTEQ", "GTEQ",
             "EQUAL", "PLUSEQ", "MINUSEQ", "STAREQ", "SLASHEQ", "PERCENTEQ", "SHIFTLEQ", "SHIFTREQ",
             "AMPERSANDEQ", "PIPEEQ", "CARETEQ", "TILDEEQ",
-            "LPAR", "RPAR", "SEMI", "COLON", "LSQB", "RSQB", "COMMA", "LBRACE", "RBRACE", "ARROW", "DOT"
+            "LPAR", "RPAR", "SEMI", "COLON", "LSQB", "RSQB", "COMMA", "LBRACE", "RBRACE", "ARROW", "DOT", "COLONS"
         )
         self.tokens += tuple(self.keywords.values())
         
@@ -96,6 +97,7 @@ class ShardLexer:
     t_RBRACE = r'\}'
     t_ARROW = r'->'
     t_DOT = r'\.'
+    t_COLONS = r'::'
 
     def t_newline(self, t):
         r'\n+'

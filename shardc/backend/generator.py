@@ -1,25 +1,29 @@
 from typing import Any
+
 from shardc.backend.codegen.lang import ProgrammingLanguage
 from shardc.backend.visitor import Visitor
-from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeStructureBody
+from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeNamespaceBody, NodeStructureBody
 from shardc.frontend.tree.condition_struct import NodeCondition, NodeElif, NodeElse, NodeIf
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
 from shardc.frontend.tree.flow_control import NodeBreak, NodeContinue, NodeReturn
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
 from shardc.frontend.tree.inline import NodeInlineC
 from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopUntil, NodeLoopWhile
+from shardc.frontend.tree.namespace_def import NodeNamespaceDefinition
 from shardc.frontend.tree.node import Node
-from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeNumber, NodeString, NodeUnaryOp
+from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeNamespaceAccess, NodeNamespaceAssignmentOp, NodeNumber, NodeString, NodeUnaryOp
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
-from shardc.frontend.tree.types import Node, NodeArrayType, NodeDereferenceType, NodeNewType, NodeTypeAlias
+from shardc.frontend.tree.types import Node, NodeArrayType, NodeNewType, NodeTypeAlias
 from shardc.utils.constants.operators import OP_BITWISE_AND, OP_BITWISE_NOT, OP_BITWISE_OR, OP_BITWISE_XOR, OP_DIVIDE, OP_GREATER_THAN, OP_GREATER_THAN_OR_EQUAL, OP_ISEQUAL, OP_ISNOTEQUAL, OP_LESSER_THAN, OP_LESSER_THAN_OR_EQUAL, OP_LOGICAL_AND, OP_LOGICAL_NOT, OP_LOGICAL_OR, OP_MINUS, OP_MODULO, OP_PLUS, OP_REFERENCE, OP_SET, OP_SET_ADD, OP_SET_AND, OP_SET_DIV, OP_SET_MOD, OP_SET_MUL, OP_SET_NOT, OP_SET_OR, OP_SET_SHL, OP_SET_SHR, OP_SET_SUB, OP_SET_XOR, OP_SHIFT_LEFT, OP_SHIFT_RIGHT, OP_SIZEOF, OP_TIMES
 from shardc.utils.constants.prefixes import C_CONST, C_VAR, S_CONST, S_VAR
+from shardc.utils.structures.stack import Stack
 
 class CodeGenerator(Visitor):
     def __init__(self, lang: ProgrammingLanguage):
         self.lang = lang
         self.main_function = "__main__"
         self.main_function_params = []
+        self.namespace_stack = Stack()
         super().__init__("generate")
 
     def generate(self, node: Node, statement: bool=False) -> Any:
@@ -28,6 +32,23 @@ class CodeGenerator(Visitor):
             return f"{code}{self.lang.end_marker}"
         return code
 
+    def _get_full_namespace_name(self, node: NodeNamespaceAccess) -> str:
+        if isinstance(node.namespace, NodeIDAccess):
+            ns_part = node.namespace.name
+        elif isinstance(node.namespace, NodeNamespaceAccess):
+            ns_part = self._get_full_namespace_name(node.namespace)
+        else:
+            ns_part = str(node.namespace)
+
+        if isinstance(node.sym, NodeIDAccess):
+            sym_part = node.sym.name
+        elif isinstance(node.sym, NodeNamespaceAccess):
+            sym_part = self._get_full_namespace_name(node.sym)
+        else:
+            sym_part = str(node.sym)
+
+        return f"{ns_part}_{sym_part}"
+
     def generate_NodeNumber(self, node: NodeNumber) -> str:
         return str(node.value)
 
@@ -35,26 +56,38 @@ class CodeGenerator(Visitor):
         return self.lang.string(node.value)
 
     def generate_NodeIDAccess(self, node: NodeIDAccess) -> str:
-        return node.name
+        if self.namespace_stack.isempty():
+            return node.name
+        return f"{'_'.join(self.namespace_stack.items())}_{node.name}"
 
     def generate_NodeArrayAccess(self, node: NodeArrayAccess) -> str:
         index = node.index.accept(self)
+        if self.namespace_stack.isempty():
+            name = node.name
+        else:
+            name = f"{'_'.join(self.namespace_stack.items())}_{node.name}"
 
-        return self.lang.access_array(node.name, index)
+        return self.lang.access_array(name, index)
 
     def generate_NodeFieldAccess(self, node: NodeFieldAccess) -> str:
         instance = node.instance.accept(self)
         field = node.field.accept(self)
 
         return self.lang.access_structure_field(instance, field)
+
+    def generate_NodeNamespaceAccess(self, node: NodeNamespaceAccess) -> str:
+        name = self._get_full_namespace_name(node)
+        return name
         
     def generate_NodeFunctionCall(self, node: NodeFunctionCall) -> str:
+        fname = node.name.accept(self)
+
         parameters = []
         if len(node.parameters) != 0:
             for param in node.parameters:
                 parameters.append(param.accept(self))
 
-        return self.lang.call_function(node.name, parameters)
+        return self.lang.call_function(fname, parameters)
 
     def generate_NodeUnaryOp(self, node: NodeUnaryOp) -> str:
         right = node.right.accept(self)
@@ -162,9 +195,34 @@ class CodeGenerator(Visitor):
             instance_name = node.instance.accept(self)
         else:
             instance_name = node.symbol.name if node.symbol is not None else node.instance
-        name = instance_name
+
+        if not self.namespace_stack.isempty():
+            name = f"{'_'.join(self.namespace_stack.items())}_{instance_name.name}"
+        else:
+            name = instance_name
 
         return table[node.op](name, field, value)
+
+    def generate_NodeNamespaceAssignmentOp(self, node: NodeNamespaceAssignmentOp) -> str:
+        value = node.value.accept(self)
+        name = self._get_full_namespace_name(node.namespace)
+
+        table = {
+            OP_SET: self.lang.assign_equal,
+            OP_SET_ADD: self.lang.assign_add,
+            OP_SET_SUB: self.lang.assign_substract,
+            OP_SET_MUL: self.lang.assign_times,
+            OP_SET_DIV: self.lang.assign_divide,
+            OP_SET_MOD: self.lang.assign_modulo,
+            OP_SET_SHL: self.lang.assign_shift_left,
+            OP_SET_SHR: self.lang.assign_shift_right,
+            OP_SET_AND: self.lang.assign_and,
+            OP_SET_OR: self.lang.assign_or,
+            OP_SET_XOR: self.lang.assign_xor,
+            OP_SET_NOT: self.lang.assign_not
+        }
+
+        return table[node.op](name, value)
 
     def generate_NodeCast(self, node: NodeCast) -> str:
         value = node.value.accept(self)
@@ -196,7 +254,11 @@ class CodeGenerator(Visitor):
         }
 
         prefix = prefixes[node.prefix]
-        name = node.symbol.name if node.symbol is not None else node.name
+        if self.namespace_stack.isempty():
+            name = node.symbol.name if node.symbol is not None else node.name
+        else:
+            full_ns = "_".join(self.namespace_stack.items())
+            name = f"{full_ns}_{node.symbol.name if node.symbol is not None else node.name}"
         t = node.shardt.c if node.shardt is not None else node.t
 
         if len(values) == 0:
@@ -230,6 +292,14 @@ class CodeGenerator(Visitor):
                 content.append(stmt.accept(self))
 
         return self.lang.codeblock(content)
+
+    def generate_NodeNamespaceBody(self, node: NodeNamespaceBody) -> str:
+        content = []
+        for stmt in node.content:
+            if stmt is not None:
+                content.append(stmt.accept(self))
+
+        return self.lang.inline(f'{self.lang.end_marker}\n'.join([c for c in content]))
 
     def generate_NodeExternDeclaration(self, node: NodeExternDeclaration) -> str:
         symbol = node.symbol.accept(self)
@@ -309,10 +379,15 @@ class CodeGenerator(Visitor):
             for param in node.parameters:
                 parameters.append(param.accept(self))
 
-        name = node.symbol.name if node.symbol is not None else node.name
+        if self.namespace_stack.isempty():
+            name = node.symbol.name if node.symbol is not None else node.name
+        else:
+            full_ns = '_'.join(self.namespace_stack.items())
+            name = f"{full_ns}_{node.symbol.name if node.symbol is not None else node.name}"
+        
         t = node.shardt.c if node.shardt is not None else node.t
 
-        if node.name == "main":
+        if node.name == "main" and self.namespace_stack.isempty():
             name = "__main__"
             self.main_function = "__main__"
             self.main_function_params = parameters
@@ -322,11 +397,22 @@ class CodeGenerator(Visitor):
         return self.lang.define_function(t, name, parameters, body)
 
     def generate_NodeStructureDefinition(self, node: NodeStructureDefinition) -> str:
-        body = node.body.accept(self)
+        if self.namespace_stack.isempty():
+            name = node.symbol.name if node.symbol is not None else node.name
+        else:
+            full_ns = '_'.join(self.namespace_stack.items())
+            name = f"{full_ns}_{node.symbol.name if node.symbol is not None else node.name}"
         
-        name = node.symbol.name if node.symbol is not None else node.name
+        body = node.body.accept(self)
 
         return self.lang.define_structure(name, body)
+
+    def generate_NodeNamespaceDefinition(self, node: NodeNamespaceDefinition) -> str:
+        name = node.symbol.name if node.symbol is not None else node.name
+        self.namespace_stack.push(name)
+        content = node.content.accept(self)
+        self.namespace_stack.pop()
+        return content
 
     def generate_NodeInlineC(self, node: NodeInlineC) -> str:
         code = node.code.value.replace('\\"', '"')

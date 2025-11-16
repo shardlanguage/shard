@@ -53,8 +53,17 @@ class NodeFieldAccess(NodeAccess):
     def __repr__(self) -> str:
         return f"NodeFieldAccess(instance={self.instance}, field={self.field}, symbol={self.symbol})"
 
+class NodeNamespaceAccess(NodeAccess):
+    def __init__(self, namespace: NodeAccess, sym: NodeAccess):
+        self.namespace = namespace
+        self.sym = sym
+        self.symbol: ShardSymbol | None = None
+
+    def __repr__(self) -> str:
+        return f"NodeNamespaceAccess(namespace={self.namespace}, sym={self.sym}, symbol={self.symbol})"
+
 class NodeFunctionCall(NodeExpression):
-    def __init__(self, name: str, parameters: list[NodeExpression]):
+    def __init__(self, name: NodeAccess, parameters: list[NodeExpression]):
         self.name = name
         self.parameters = parameters
         self.symbol: ShardSymbol | None = None
@@ -110,6 +119,16 @@ class NodeFieldAssignmentOp(NodeExpression):
 
     def __repr__(self) -> str:
         return f"NodeFieldAssignmentOp(op={self.op}, instance={self.instance}, field={self.field}, value={self.value}, symbol={self.symbol})"
+
+class NodeNamespaceAssignmentOp(NodeExpression):
+    def __init__(self, op: str, namespace: NodeNamespaceAccess, value: NodeExpression):
+        self.op = op
+        self.namespace = namespace
+        self.value = value
+        self.symbol: ShardSymbol | None = None
+
+    def __repr__(self) -> str:
+        return f"NodeNamespaceAccess(op={self.op}, namespace={self.namespace}, value={self.value}, symbol={self.symbol})"
 
 class NodeCast(NodeExpression):
     def __init__(self, value: NodeExpression, t: 'NodeT'):

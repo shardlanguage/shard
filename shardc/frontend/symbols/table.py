@@ -8,10 +8,11 @@ class SymbolTable:
         self.parent = parent
         self.table = {}
 
-    def add_symbol(self, symbol: ShardSymbol) -> None:
-        if symbol.name in self.table:
-            ShardError_SymbolRedeclared(symbol.name).display()
-
+    def add_symbol(self, symbol: ShardSymbol, check: bool=True) -> None:
+        if check:
+            if symbol.name in self.table:
+                ShardError_SymbolRedeclared(symbol.name).display()
+        
         self.table[symbol.name] = symbol
 
     def remove_symbol(self, name: str) -> None:
@@ -20,10 +21,19 @@ class SymbolTable:
 
         self.table.pop(name)
 
-    def get_symbol(self, name: str) -> ShardSymbol:
+    def get_symbol(self, name: str, error: bool=True) -> ShardSymbol | None:
         if name in self.table:
             return self.table[name]
         elif self.parent is not None:
             return self.parent.get_symbol(name)
         else:
-            ShardError_UnknownSymbol(name).display()
+            if error:
+                ShardError_UnknownSymbol(name).display()
+            else:
+                return None
+
+    def get_root(self) -> SymbolTable:
+        t = self
+        while t.parent is not None:
+            t = t.parent
+        return t

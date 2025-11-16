@@ -4,6 +4,7 @@ from shardc.frontend.tree.condition_struct import NodeIf, NodeElif, NodeElse, No
 from shardc.frontend.tree.flow_control import NodeBreak, NodeContinue, NodeReturn
 from shardc.frontend.tree.loop_struct import NodeLoopStructure
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
+from shardc.frontend.tree.namespace_def import NodeNamespaceDefinition
 from shardc.frontend.tree.node import Node
 from shardc.utils.errors.context import ShardError_BreakOutsideOfLoop, ShardError_ContinueOutsideOfLoop, ShardError_ReturnOutsideOfFunction
 from shardc.utils.structures.stack import Stack
@@ -15,7 +16,8 @@ class ContextChecker(Visitor):
         super().__init__("check")
 
     def check_context(self, node: Node) -> None:
-        node.accept(self)
+        if node is not None:
+            node.accept(self)
 
     def check_NodeCodeBlock(self, node: NodeCodeBlock) -> None:
         for statement in node.content:
@@ -42,6 +44,9 @@ class ContextChecker(Visitor):
         self.loop_stack.push(True)
         self.check_context(node.branch)
         self.loop_stack.pop()
+
+    def check_NodeNamespaceDefinition(self, node: NodeNamespaceDefinition) -> None:
+        self.check_context(node.content)
 
     def check_NodeFunctionDefinition(self, node: NodeFunctionDefinition) -> None:
         self.function_stack.push(True)

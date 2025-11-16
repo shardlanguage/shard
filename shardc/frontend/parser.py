@@ -1,19 +1,21 @@
-from typing import Any
+from typing import Any, override
 import ply.yacc as yacc
 import codecs
 
 from shardc.frontend.lexer import ShardLexer
-from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeStructureBody
+from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeNamespaceBody, NodeStructureBody
 from shardc.frontend.tree.condition_struct import NodeCondition, NodeElif, NodeElse, NodeIf
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
-from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeNumber, NodeString, NodeUnaryOp
+from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeFunctionCall, NodeGroupOp, NodeIDAccess, NodeNamespaceAccess, NodeNamespaceAssignmentOp, NodeNumber, NodeString, NodeUnaryOp
 from shardc.frontend.tree.flow_control import NodeBreak, NodeContinue, NodeReturn
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
 from shardc.frontend.tree.inline import NodeInlineC
 from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopUntil, NodeLoopWhile
+from shardc.frontend.tree.namespace_def import NodeNamespaceDefinition
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
-from shardc.frontend.tree.types import NodeArrayType, NodeDereferenceType, NodeNewType, NodeType, NodeTypeAlias
+from shardc.frontend.tree.types import NodeArrayType, NodeDereferenceType, NodeNamespaceType, NodeNewType, NodeType, NodeTypeAlias
 from shardc.utils.constants.keywords import KW_WHILE
+from shardc.utils.constants.symbols import SYM_COLON_BLOCK, SYM_DOT
 from shardc.utils.errors.syntax import ShardError_BadSyntax, ShardError_EOF
 
 class ShardParser:
@@ -70,6 +72,7 @@ class ShardParser:
                   | flow_control SEMI
                   | function_definition
                   | structure_definition
+                  | namespace_definition
                   | inline SEMI
                   | extern_declaration SEMI
                   | type_definition SEMI
@@ -104,7 +107,7 @@ class ShardParser:
 
     def p_expression_function_call(self, p):
         """
-        expression : ID LPAR expression_list RPAR
+        expression : id_access LPAR expression_list RPAR
         """
         p[0] = NodeFunctionCall(p[1], p[3])
 
@@ -168,6 +171,8 @@ class ShardParser:
             p[0] = NodeArrayAssignmentOp(p[2], p[1], p[3])
         elif isinstance(p[1], NodeFieldAccess):
             p[0] = NodeFieldAssignmentOp(p[2], p[1], p[3])
+        elif isinstance(p[1], NodeNamespaceAccess):
+            p[0] = NodeNamespaceAssignmentOp(p[2], p[1], p[3])
 
     def p_expression_cast(self, p):
         """
@@ -279,6 +284,12 @@ class ShardParser:
         """
         p[0] = NodeStructureDefinition(p[2], p[3])
 
+    def p_namespace_definition(self, p):
+        """
+        namespace_definition : NAMESPACE ID namespace_body
+        """
+        p[0] = NodeNamespaceDefinition(p[2], p[3])
+
     def p_inline_c(self, p):
         """
         inline : C expression
@@ -307,12 +318,16 @@ class ShardParser:
         """
         id_access : ID
                   | id_access DOT id_access
+                  | id_access COLONS id_access
                   | ID LSQB expression RSQB
         """
         if len(p) == 2:
             p[0] = NodeIDAccess(p[1])
         elif len(p) == 4:
-            p[0] = NodeFieldAccess(p[1], p[3])
+            if p[2] == SYM_DOT:
+                p[0] = NodeFieldAccess(p[1], p[3])
+            elif p[2] == SYM_COLON_BLOCK:
+                p[0] = NodeNamespaceAccess(p[1], p[3])
         else:
             p[0] = NodeArrayAccess(p[1], p[3])
 
@@ -325,14 +340,17 @@ class ShardParser:
 
     def p_type(self, p):
         """
-        type : ID
-             | dereferences ID
-             | LSQB expression RSQB ID
+        type : id_access
+             | dereferences id_access
+             | id_access COLONS id_access
+             | LSQB expression RSQB id_access
         """
         if len(p) == 2:
             p[0] = NodeType(p[1])
         elif len(p) == 3:
             p[0] = NodeDereferenceType(p[2], len(p[1]))
+        elif len(p) == 4:
+            p[0] = NodeNamespaceType(p[1], p[3])
         elif len(p) == 5:
             p[0] = NodeArrayType(p[4], p[2])
 
@@ -394,6 +412,12 @@ class ShardParser:
         structure_body : LBRACE statement_list_opt RBRACE
         """
         p[0] = NodeStructureBody(p[2])
+
+    def p_namespace_body(self, p):
+        """
+        namespace_body : LBRACE statement_list_opt RBRACE
+        """
+        p[0] = NodeNamespaceBody(p[2])
 
     def p_error(self, p) -> None:
         if p:

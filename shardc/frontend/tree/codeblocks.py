@@ -13,3 +13,10 @@ class NodeStructureBody(Node):
 
     def __repr__(self) -> str:
         return f"NodeStructureBody(content={self.content})"
+
+class NodeNamespaceBody(Node):
+    def __init__(self, content: list[Node]):
+        self.content = content
+
+    def __repr__(self) -> str:
+        return f"NodeNamespaceBody(content={self.content})"

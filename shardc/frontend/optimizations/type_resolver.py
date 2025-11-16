@@ -1,51 +1,111 @@
 from typing import Any
+
 from shardc.backend.visitor import Visitor
-from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeStructureBody
+from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeNamespaceBody, NodeStructureBody
 from shardc.frontend.tree.condition_struct import NodeCondition, NodeElif, NodeElse, NodeIf
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
-from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAccess, NodeFieldAssignmentOp, NodeIDAccess, NodeUnaryOp
+from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAssignmentOp, NodeIDAccess, NodeNamespaceAccess, NodeUnaryOp
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
 from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopUntil, NodeLoopWhile
+from shardc.frontend.tree.namespace_def import NodeNamespaceDefinition
 from shardc.frontend.tree.node import Node
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
-from shardc.frontend.tree.types import NodeArrayType, NodeDereferenceType, NodeNewType, NodeT, NodeType, NodeTypeAlias
+from shardc.frontend.tree.types import NodeArrayType, NodeDereferenceType, NodeNamespaceType, NodeNewType, NodeT, NodeType, NodeTypeAlias
 from shardc.frontend.types.shardtype import ShardType
 from shardc.frontend.types.table import TypeTable
 from shardc.utils.constants.types import S_VOID
+from shardc.utils.structures.stack import Stack
 
 class TypeResolver(Visitor):
     def __init__(self, type_table: TypeTable):
         self.type_table = type_table
+        self.namespace_stack = Stack()
         super().__init__("resolve")
 
-    def resolve_type(self, node: Node) -> None:
+    def _resolve_scoped_name(self, node: NodeNamespaceAccess) -> str:
+        if isinstance(node.namespace, NodeIDAccess):
+            ns_part = node.namespace.name
+        elif isinstance(node.namespace, NodeNamespaceAccess):
+            ns_part = self._resolve_scoped_name(node.namespace)
+        else:
+            ns_part = node.namespace.accept(self)
+
+        if isinstance(node.sym, NodeIDAccess):
+            sym_part = node.sym.name
+        elif isinstance(node.sym, NodeNamespaceAccess):
+            sym_part = self._resolve_scoped_name(node.sym)
+        else:
+            sym_part = str(node.sym)
+
+        return f"{ns_part}::{sym_part}"
+
+    def resolve_type(self, node: Node) -> Any:
         if node is not None:
-            node.accept(self)
+            return node.accept(self)
 
     def resolve_NodeType(self, node: NodeType) -> ShardType:
-        return self.type_table.get_type(node.name)
-
-    def resolve_NodeReferenceType(self, node: NodeDereferenceType) -> ShardType:
-        return self.type_table.get_type(node.name)
+        tname = node.name.name if hasattr(node.name, "name") else str(node.name)
+        return self.type_table.get_type(tname)
 
     def resolve_NodeArrayType(self, node: NodeArrayType) -> ShardType:
-        return self.type_table.get_type(node.name)
+        base = self.resolve_type(node.name)
+        shardt = base.clone()
+        shardt.name = f"{base.name}[{node.length}]"
+        shardt.length = node.length
+        if shardt.name not in self.type_table.table:
+            self.type_table.add_array_type(shardt)
+        return shardt
 
     def resolve_NodeDereferenceType(self, node: NodeDereferenceType) -> ShardType:
-        return self.type_table.get_type(node.name)
+        if hasattr(node.name, "name"):
+            type_name = node.name.name
+        else:
+            type_name = str(node.name)
 
-    def resolve_NodeTypeAlias(self, node: NodeTypeAlias) -> None:
+        base = self.type_table.get_type(type_name)
+
+        shardt = base.clone()
+        n_stars = node.nderefs
+        if base.c.endswith('*'):
+            n_stars -= base.c.count('*')
+        shardt.name = f"{base.name}{'*'*max(n_stars,0)}"
+        shardt.c = f"{base.c}{'*'*max(n_stars,0)}"
+
+        if shardt.name not in self.type_table.table:
+            self.type_table.add_deref_type(shardt)
+
+        return shardt
+
+    def resolve_NodeNamespaceType(self, node: NodeNamespaceType):
+        ns_name = node.namespace.accept(self)
+        t_name = node.t.accept(self) if isinstance(node.t, NodeType) else str(node.t)
+        scoped_name = f"{ns_name}::{t_name}"
+
+        t = self.type_table.get_type(scoped_name)
+        return t
+
+    def resolve_NodeTypeAlias(self, node: NodeTypeAlias) -> ShardType:
         self.resolve_type(node.base)
-        t = self.type_table.get_type(node.base.name)
+        t = self.type_table.get_type(node.base)
         t.name = node.name
         self.type_table.add_type(t)
+        return t
 
-    def resolve_NodeNewType(self, node: NodeNewType) -> None:
-        t = ShardType(node.name, node.translation[1:-1])
+    def resolve_NodeNewType(self, node: NodeNewType) -> ShardType:
+        t = ShardType(node.name.name, node.translation[1:-1])
         self.type_table.add_type(t)
+        return t
 
     def resolve_NodeArrayAccess(self, node: NodeArrayAccess) -> None:
         self.resolve_type(node.index)
+
+    def resolve_NodeNamespaceAccess(self, node: NodeNamespaceAccess):
+        scoped_name = self._resolve_scoped_name(node)
+        return self.type_table.get_type(scoped_name)
+
+    def resolve_NodeIDAccess(self, node: NodeIDAccess) -> ShardType | None:
+        if isinstance(node.name, NodeT):
+            return self.type_table.get_type(node.name)
 
     def resolve_NodeUnaryOp(self, node: NodeUnaryOp) -> None:
         self.resolve_type(node.right)
@@ -64,7 +124,7 @@ class TypeResolver(Visitor):
     def resolve_NodeFieldAssignmentOp(self, node: NodeFieldAssignmentOp) -> None:
         self.resolve_type(node.value)
 
-    def resolve_NodeCast(self, node: NodeCast) -> None:
+    def resolve_NodeCast(self, node: NodeCast) -> ShardType:
         t: Any = node.t.accept(self)
         base = self.type_table.get_type(t.name)
         shardt = base.clone()
@@ -87,27 +147,14 @@ class TypeResolver(Visitor):
 
         node.shardt = shardt
         self.resolve_type(node.value)
+        return node.shardt
 
     def resolve_NodeVariableDeclaration(self, node: NodeVariableDeclaration) -> None:
-        t: Any = node.t.accept(self)
-        base = self.type_table.get_type(t.name)
-        shardt = base.clone()
-        if isinstance(node.t, NodeArrayType):
-            shardt.name = f"{node.t.name}[{node.t.length}]"
-            shardt.length = node.t.length
-            if shardt.name not in self.type_table.table:
-                self.type_table.add_array_type(shardt)
-
-        elif isinstance(node.t, NodeDereferenceType):
-            base = self.type_table.get_type(node.t.name)
-            n_stars = node.t.nderefs
-            if base.c.endswith('*'):
-                n_stars -= base.c.count('*')
-            shardt.name = f"{base.name}{'*'*max(n_stars,0)}"
-            shardt.c = f"{base.c}{'*'*max(n_stars,0)}"
-            if shardt.name not in self.type_table.table:
-                self.type_table.add_deref_type(shardt)
-        node.shardt = shardt
+        if isinstance(node.t.name, NodeNamespaceAccess):
+            t: Any = node.t.name.accept(self)
+        else:
+            t: Any = node.t.accept(self)
+        node.shardt = t
 
         if node.value is not None:
             self.resolve_type(node.value)
@@ -124,6 +171,10 @@ class TypeResolver(Visitor):
         self.type_table = old_table
 
     def resolve_NodeStructureBody(self, node: NodeStructureBody) -> None:
+        for stmt in node.content:
+            self.resolve_type(stmt)
+
+    def resolve_NodeNamespaceBody(self, node: NodeNamespaceBody) -> None:
         for stmt in node.content:
             self.resolve_type(stmt)
 
@@ -161,27 +212,13 @@ class TypeResolver(Visitor):
 
     def resolve_NodeFunctionDefinition(self, node: NodeFunctionDefinition) -> None:
         if node.t is not None:
-            t: Any = node.t.accept(self)
-            base = self.type_table.get_type(t.name)
-            shardt = base.clone()
-
-            if isinstance(node.t, NodeArrayType):
-                base = self.type_table.get_type(node.t.name)
-                shardt.name = f"[{node.t.length}]{base.name}"
-                shardt.c = f"{base.c}[{node.t.length}]"
-                shardt.length = node.t.length
-                if shardt.name not in self.type_table.table:
-                    self.type_table.add_array_type(shardt)
-
-            elif isinstance(node.t, NodeDereferenceType):
-                base = self.type_table.get_type(node.t.name)
-                shardt.name = f"{base.name}{'*'*node.t.nderefs}"
-                shardt.c = f"{base.c}{'*'*node.t.nderefs}"
-                if shardt.name not in self.type_table.table:
-                    self.type_table.add_deref_type(shardt)
-            node.shardt = shardt
+            if isinstance(node.t.name, NodeNamespaceAccess):
+                t: Any = node.t.name.accept(self)
+            else:
+                t: Any = node.t.accept(self)
         else:
-            node.shardt = self.type_table.table[S_VOID]
+            t: Any = self.type_table.table[S_VOID]
+        node.shardt = t
 
         for param in node.parameters:
             self.resolve_type(param)
@@ -189,6 +226,34 @@ class TypeResolver(Visitor):
         self.resolve_type(node.body)
 
     def resolve_NodeStructureDefinition(self, node: NodeStructureDefinition) -> None:
-        self.type_table.add_type(ShardType(node.name, f"struct {node.name}"))
+        if self.namespace_stack.isempty():
+            full_name = node.name
+            c_name = f"struct {node.name}"
+        else:
+            full_name = "::".join(self.namespace_stack.items()) + f"::{node.name}"
+            c_name = "struct " + "_".join(self.namespace_stack.items()) + f"_{node.name}"
+
+        name = ShardType(full_name, c_name)
+        self.type_table.add_type(name)
 
         self.resolve_type(node.body)
+
+    def resolve_NodeNamespaceDefinition(self, node: NodeNamespaceDefinition) -> None:
+        if isinstance(node.name, str):
+            ns_name = node.name
+        else:
+            ns_name = node.name.name
+
+        if self.namespace_stack.isempty():
+            full_name = ns_name
+            c_name = f"__shardc_namespace_{ns_name}"
+        else:
+            full_name = "::".join(self.namespace_stack.items()) + f"::{ns_name}"
+            c_name = "_".join(self.namespace_stack.items()) + f"_{ns_name}"
+
+        name = ShardType(full_name, c_name)
+        self.type_table.add_type(name, check=False)
+
+        self.namespace_stack.push(ns_name)
+        self.resolve_type(node.content)
+        self.namespace_stack.pop()

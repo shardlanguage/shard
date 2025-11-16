@@ -16,3 +16,10 @@ class Stack:
     def pop(self) -> Any:
         if not self.isempty():
             return self.content.pop()
+
+    def peek(self) -> Any:
+        if not self.isempty():
+            return self.content[-1]
+
+    def items(self) -> list[Any]:
+        return self.content.copy()
