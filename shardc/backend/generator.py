@@ -132,6 +132,7 @@ class CodeGenerator(Visitor):
 
     def generate_NodeAssignmentOp(self, node: NodeAssignmentOp) -> str:
         value = node.value.accept(self)
+        name = f"{'_'.join(self.namespace_stack.items())}_{node.name}"
         
         table = {
             OP_SET: self.lang.assign_equal,
@@ -148,11 +149,12 @@ class CodeGenerator(Visitor):
             OP_SET_NOT: self.lang.assign_not
         }
 
-        return table[node.op](node.name, value)
+        return table[node.op](name, value)
 
     def generate_NodeArrayAssignmentOp(self, node: NodeArrayAssignmentOp) -> str:
         value = node.value.accept(self)
         index = node.index.accept(self)
+        name = f"{'_'.join(self.namespace_stack.items())}_{node.name}"
         
         table = {
             OP_SET: self.lang.assign_equal_array,
@@ -169,7 +171,7 @@ class CodeGenerator(Visitor):
             OP_SET_NOT: self.lang.assign_not_array
         }
 
-        return table[node.op](node.name, index, value)
+        return table[node.op](name, index, value)
 
     def generate_NodeFieldAssignmentOp(self, node: NodeFieldAssignmentOp) -> str:
         value = node.value.accept(self)
