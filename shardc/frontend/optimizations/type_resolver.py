@@ -44,7 +44,13 @@ class TypeResolver(Visitor):
             return node.accept(self)
 
     def resolve_NodeType(self, node: NodeType) -> ShardType:
-        tname = node.name.name if hasattr(node.name, "name") else str(node.name)
+        if isinstance(node.name, NodeIDAccess):
+            tname = node.name.name
+        elif isinstance(node.name, NodeNamespaceAccess):
+            tname = self._resolve_scoped_name(node.name)
+        else:
+            tname = str(node.name)
+
         return self.type_table.get_type(tname)
 
     def resolve_NodeArrayType(self, node: NodeArrayType) -> ShardType:
@@ -144,11 +150,11 @@ class TypeResolver(Visitor):
 
         node.shardt = shardt
         self.resolve_type(node.value)
+
         return shardt
 
     def resolve_NodeVariableDeclaration(self, node: NodeVariableDeclaration) -> None:
-        t = self.resolve_type(node.t)
-        node.shardt = t
+        node.shardt = self.resolve_type(node.t)
 
         if node.value is not None:
             self.resolve_type(node.value)
@@ -224,19 +230,16 @@ class TypeResolver(Visitor):
             full_name = node.name
             c_name = f"struct {node.name}"
         else:
-            full_name = f"{'::'.join(self.namespace_stack.items())}::{node.name}"
+            full_name = "::".join(self.namespace_stack.items()) + f"::{node.name}"
             c_name = f"struct {'_'.join(self.namespace_stack.items())}_{node.name}"
 
-        name = ShardType(full_name, c_name)
-        self.type_table.add_type(name)
+        struct_type = ShardType(full_name, c_name)
+        self.type_table.add_type(struct_type)
 
         self.resolve_type(node.body)
 
     def resolve_NodeNamespaceDefinition(self, node: NodeNamespaceDefinition) -> None:
-        if isinstance(node.name, str):
-            ns_name = node.name
-        else:
-            ns_name = node.name.name
+        ns_name = node.name.name if hasattr(node.name, "name") else node.name
 
         if self.namespace_stack.isempty():
             full_name = ns_name
@@ -245,8 +248,8 @@ class TypeResolver(Visitor):
             full_name = "::".join(self.namespace_stack.items()) + f"::{ns_name}"
             c_name = "_".join(self.namespace_stack.items()) + f"_{ns_name}"
 
-        name = ShardType(full_name, c_name)
-        self.type_table.add_type(name, check=False)
+        namespace_type = ShardType(full_name, c_name)
+        self.type_table.add_type(namespace_type, check=False)
 
         self.namespace_stack.push(ns_name)
         self.resolve_type(node.content)
