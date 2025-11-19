@@ -199,7 +199,7 @@ class CodeGenerator(Visitor):
             instance_name = node.symbol.name if node.symbol is not None else node.instance
 
         if not self.namespace_stack.isempty():
-            name = f"{'_'.join(self.namespace_stack.items())}_{instance_name.name}"
+            name = f"{'_'.join(self.namespace_stack.items())}_{instance_name.name if not isinstance(instance_name, str) else instance_name}"
         else:
             name = instance_name
 

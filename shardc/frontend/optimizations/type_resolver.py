@@ -57,19 +57,20 @@ class TypeResolver(Visitor):
         return shardt
 
     def resolve_NodeDereferenceType(self, node: NodeDereferenceType) -> ShardType:
-        if hasattr(node.name, "name"):
-            type_name = node.name.name
+        if isinstance(node.name, NodeNamespaceAccess):
+            base = self.resolve_NodeNamespaceAccess(node.name)
+        elif isinstance(node.name, NodeType):
+            base = self.resolve_NodeType(node.name)
         else:
-            type_name = str(node.name)
-
-        base = self.type_table.get_type(type_name)
+            type_name = node.name.name if hasattr(node.name, "name") else str(node.name)
+            base = self.type_table.get_type(type_name)
 
         shardt = base.clone()
         n_stars = node.nderefs
         if base.c.endswith('*'):
-            n_stars -= base.c.count('*')
-        shardt.name = f"{base.name}{'*'*max(n_stars,0)}"
-        shardt.c = f"{base.c}{'*'*max(n_stars,0)}"
+            n_stars -= base.name.count('*')
+        shardt.name = f"{base.name}{'*'*max(n_stars, 1)}"
+        shardt.c = f"{base.c}{'*'*max(n_stars, 1)}"
 
         if shardt.name not in self.type_table.table:
             self.type_table.add_deref_type(shardt)
@@ -146,10 +147,7 @@ class TypeResolver(Visitor):
         return shardt
 
     def resolve_NodeVariableDeclaration(self, node: NodeVariableDeclaration) -> None:
-        if isinstance(node.t.name, NodeNamespaceAccess):
-            t: Any = node.t.name.accept(self)
-        else:
-            t: Any = node.t.accept(self)
+        t = self.resolve_type(node.t)
         node.shardt = t
 
         if node.value is not None:
@@ -226,8 +224,8 @@ class TypeResolver(Visitor):
             full_name = node.name
             c_name = f"struct {node.name}"
         else:
-            full_name = "::".join(self.namespace_stack.items()) + f"::{node.name}"
-            c_name = "struct " + "_".join(self.namespace_stack.items()) + f"_{node.name}"
+            full_name = f"{'::'.join(self.namespace_stack.items())}::{node.name}"
+            c_name = f"struct {'_'.join(self.namespace_stack.items())}_{node.name}"
 
         name = ShardType(full_name, c_name)
         self.type_table.add_type(name)
