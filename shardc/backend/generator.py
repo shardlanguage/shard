@@ -198,12 +198,7 @@ class CodeGenerator(Visitor):
         else:
             instance_name = node.symbol.name if node.symbol is not None else node.instance
 
-        if not self.namespace_stack.isempty():
-            name = f"{'_'.join(self.namespace_stack.items())}_{instance_name.name if not isinstance(instance_name, str) else instance_name}"
-        else:
-            name = instance_name
-
-        return table[node.op](name, field, value)
+        return table[node.op](instance_name, field, value)
 
     def generate_NodeNamespaceAssignmentOp(self, node: NodeNamespaceAssignmentOp) -> str:
         value = node.value.accept(self)
