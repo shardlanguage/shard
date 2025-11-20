@@ -72,23 +72,46 @@ class SymbolResolver(Visitor):
         self.resolve_symbol(node.index)
 
     def resolve_NodeFieldAccess(self, node: NodeFieldAccess) -> None:
+        def _extract_base_type(t: str) -> str:
+            while t.endswith("*"):
+                t = t[:-1]
+
+            while t.endswith("]"):
+                i = t.rfind("[")
+                if i == -1:
+                    break
+                t = t[:i]
+
+            return t
+
         self.resolve_symbol(node.instance)
-        instance_symbol = self.symbol_table.get_symbol(node.instance.name)
-        node.instance.symbol = instance_symbol
+        instance_symbol = getattr(node.instance, "symbol", None)
 
-        def _find_structure(typename: str):
+        if instance_symbol is None:
+            node.symbol = None
+            return
+
+        typename = instance_symbol.t
+        base_type = _extract_base_type(typename)
+
+        if "::" in base_type:
+            struct_symbol = self._get_scoped_symbol(base_type)
+        else:
             table = self.symbol_table
+            struct_symbol = None
             while table is not None:
-                for sym in table.table.values():
-                    if isinstance(sym, ShardStructure) and sym.name == typename:
-                        return sym
+                sym = table.get_symbol(base_type, error=False)
+                if isinstance(sym, ShardStructure):
+                    struct_symbol = sym
+                    break
                 table = getattr(table, "parent", None)
-            return None
 
-        struct = _find_structure(instance_symbol.t)
+        if not isinstance(struct_symbol, ShardStructure):
+            node.symbol = None
+            return
 
         field_name = node.field.name
-        field_symbol = struct.symbol_table.get_symbol(field_name)
+        field_symbol = struct_symbol.symbol_table.get_symbol(field_name, error=False)
 
         node.field.symbol = field_symbol
         node.symbol = field_symbol
