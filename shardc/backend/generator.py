@@ -132,8 +132,12 @@ class CodeGenerator(Visitor):
 
     def generate_NodeAssignmentOp(self, node: NodeAssignmentOp) -> str:
         value = node.value.accept(self)
-        name = f"{'_'.join(self.namespace_stack.items())}_{node.name}"
-        
+
+        if not self.namespace_stack.isempty():
+            name = f"{'_'.join(self.namespace_stack.items())}_{node.name}"
+        else:
+            name = node.symbol.name if node.symbol is not None else node.name
+
         table = {
             OP_SET: self.lang.assign_equal,
             OP_SET_ADD: self.lang.assign_add,
@@ -154,7 +158,11 @@ class CodeGenerator(Visitor):
     def generate_NodeArrayAssignmentOp(self, node: NodeArrayAssignmentOp) -> str:
         value = node.value.accept(self)
         index = node.index.accept(self)
-        name = f"{'_'.join(self.namespace_stack.items())}_{node.name}"
+
+        if not self.namespace_stack.isempty():
+            name = f"{'_'.join(self.namespace_stack.items())}_{node.name}"
+        else:
+            name = node.symbol.name if node.symbol is not None else node.name
         
         table = {
             OP_SET: self.lang.assign_equal_array,
@@ -176,6 +184,7 @@ class CodeGenerator(Visitor):
     def generate_NodeFieldAssignmentOp(self, node: NodeFieldAssignmentOp) -> str:
         value = node.value.accept(self)
         field = node.field.accept(self)
+        instance_name = node.instance.accept(self)
         
         table = {
             OP_SET: self.lang.assign_equal_field,
@@ -191,12 +200,6 @@ class CodeGenerator(Visitor):
             OP_SET_XOR: self.lang.assign_xor_field,
             OP_SET_NOT: self.lang.assign_not_field
         }
-
-        name = ""
-        if isinstance(node.instance, NodeArrayAccess):
-            instance_name = node.instance.accept(self)
-        else:
-            instance_name = node.symbol.name if node.symbol is not None else node.instance
 
         return table[node.op](instance_name, field, value)
 
