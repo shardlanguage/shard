@@ -420,10 +420,30 @@ class ShardParser:
         p[0] = NodeNamespaceBody(p[2])
 
     def p_error(self, p) -> None:
-        if p:
-            ShardError_BadSyntax(p.value, p.lexer.lineno).display()
-        else:
+        if not p:
             ShardError_EOF().display()
+            return
+
+        source = p.lexer.lexdata
+        pos = p.lexpos  
+
+        lineno = p.lexer.lineno
+        start = source.rfind("\n", 0, pos) + 1
+        end = source.find("\n", pos)
+        if end == -1:
+            end = len(source)
+
+        line_text = source[start:end]
+        col = pos - start
+
+        caret = " " * col + "^"
+
+        text = (
+            f"\n{line_text}\n"
+            f"{caret}"
+        )
+
+        ShardError_BadSyntax(text, p.lexer.lineno).display()
 
     def build(self, **kwargs):
         self.parser = yacc.yacc(module=self, debug=False, write_tables=False, **kwargs)
