@@ -1,4 +1,4 @@
-ROOTFILE = "root.sd"
+ROOTFILE = "__root__.sd"
 LIB_PREFIX = "lib:"
 LIB_PATH = "/usr/local/lib/shard/"
 
