@@ -222,9 +222,11 @@ class SymbolResolver(Visitor):
                 self.resolve_symbol(stmt)
 
     def resolve_NodeIf(self, node: NodeIf) -> None:
+        self.resolve_symbol(node.condition)
         self.resolve_symbol(node.branch)
 
     def resolve_NodeElif(self, node: NodeElif) -> None:
+        self.resolve_symbol(node.condition)
         self.resolve_symbol(node.branch)
 
     def resolve_NodeElse(self, node: NodeElse) -> None:

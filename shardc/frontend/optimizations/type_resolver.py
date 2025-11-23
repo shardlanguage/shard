@@ -8,6 +8,7 @@ from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmen
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
 from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopUntil, NodeLoopWhile
 from shardc.frontend.tree.namespace_def import NodeNamespaceDefinition
+from shardc.frontend.tree.flow_control import NodeReturn
 from shardc.frontend.tree.node import Node
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
 from shardc.frontend.tree.types import NodeArrayType, NodeDereferenceType, NodeNamespaceType, NodeNewType, NodeT, NodeType, NodeTypeAlias
@@ -179,9 +180,11 @@ class TypeResolver(Visitor):
             self.resolve_type(stmt)
 
     def resolve_NodeIf(self, node: NodeIf) -> None:
+        self.resolve_type(node.condition)
         self.resolve_type(node.branch)
 
     def resolve_NodeElif(self, node: NodeElif) -> None:
+        self.resolve_type(node.condition)
         self.resolve_type(node.branch)
 
     def resolve_NodeElse(self, node: NodeElse) -> None:
@@ -254,3 +257,7 @@ class TypeResolver(Visitor):
         self.namespace_stack.push(ns_name)
         self.resolve_type(node.content)
         self.namespace_stack.pop()
+
+    def resolve_NodeReturn(self, node: NodeReturn):
+        if node.value is not None:
+            self.resolve_type(node.value)
