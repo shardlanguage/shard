@@ -69,8 +69,11 @@ class ShardPreProcessor:
         if file in self.included_files:
             return
 
-        project_root = self.find_root()
-        toinc = f"{project_root}/{file}"
+        if not file.startswith(LIB_PATH):
+            project_root = self.find_root()
+            toinc = f"{project_root}/{file}"
+        else:
+            toinc = file.replace(LIB_PREFIX, '')
         self.included_files.append(file)
 
         local_spp = ShardPreProcessor(toinc)

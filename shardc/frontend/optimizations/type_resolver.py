@@ -4,7 +4,7 @@ from shardc.backend.visitor import Visitor
 from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeNamespaceBody, NodeStructureBody
 from shardc.frontend.tree.condition_struct import NodeCondition, NodeElif, NodeElse, NodeIf
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
-from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAssignmentOp, NodeIDAccess, NodeNamespaceAccess, NodeUnaryOp
+from shardc.frontend.tree.expressions import NodeArrayAccess, NodeArrayAssignmentOp, NodeAssignmentOp, NodeBinaryOp, NodeCast, NodeFieldAssignmentOp, NodeIDAccess, NodeNamespaceAccess, NodeUnaryOp, NodeFunctionCall
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
 from shardc.frontend.tree.loop_struct import NodeLoopFor, NodeLoopForever, NodeLoopUntil, NodeLoopWhile
 from shardc.frontend.tree.namespace_def import NodeNamespaceDefinition
@@ -119,6 +119,10 @@ class TypeResolver(Visitor):
         if isinstance(node.name, NodeT):
             type_name = node.name if isinstance(node.name, str) else getattr(node.name, 'name', str(node.name))
             return self.type_table.get_type(type_name)
+
+    def resolve_NodeFunctionCall(self, node: NodeFunctionCall) -> None:
+        for param in node.parameters:
+            self.resolve_type(param)
 
     def resolve_NodeUnaryOp(self, node: NodeUnaryOp) -> None:
         self.resolve_type(node.right)
