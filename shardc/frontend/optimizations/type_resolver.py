@@ -104,7 +104,8 @@ class TypeResolver(Visitor):
         return alias_type
 
     def resolve_NodeNewType(self, node: NodeNewType) -> ShardType:
-        t = ShardType(node.name.name, node.translation[1:-1])
+        newt_name = f"{'::'.join(self.namespace_stack.items())}::{node.name}"
+        t = ShardType(newt_name, node.translation[1:-1])
         self.type_table.add_type(t)
         return t
 
