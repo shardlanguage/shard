@@ -19,6 +19,7 @@ def cli():
     parser.add_argument("-tflags", "--target-flags", type=list[str], help="Pass flags to target specified with -T")
     parser.add_argument("--keep-all", action="store_true", help="Keep intermediate files")
     parser.add_argument("--no-main", action="store_true", help="Do not generate main() automatically")
+    parser.add_argument("-nostd", action="store_true", help="Disable dependencies to std")
 
     args = parser.parse_args()
     run_command(args)

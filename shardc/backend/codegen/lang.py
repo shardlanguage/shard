@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 
 class ProgrammingLanguage(ABC):
     name: str = "unknown"
@@ -10,7 +10,7 @@ class ProgrammingLanguage(ABC):
     def inline(self, code) -> str: ...
 
     @abstractmethod
-    def preamble(self) -> str: ...
+    def preamble(self, extra_includes: bool=True) -> str: ...
 
     @abstractmethod
     def main_function(self, f, args) -> str: ...

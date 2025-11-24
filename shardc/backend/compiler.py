@@ -10,17 +10,19 @@ class Compiler:
                 type_resolver: TypeResolver,
                 symbol_resolver: SymbolResolver,
                 context_checker: ContextChecker,
-                content_verifier: ContentVerifier
+                content_verifier: ContentVerifier,
+                std: bool=True
         ):
         self.content_verifier = content_verifier
         self.context_checker = context_checker
         self.type_resolver = type_resolver
         self.symbol_resolver = symbol_resolver
         self.code_generator = code_generator
+        self.std = std
         self.code = []
 
     def add_preamble(self) -> None:
-        preamble = self.code_generator.lang.preamble()
+        preamble = self.code_generator.lang.preamble(extra_includes=self.std)
         self.code.append(preamble)
 
     def compile_node(self, node: Node) -> None:

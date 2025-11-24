@@ -51,7 +51,7 @@ def preprocess_file(file: str) -> str:
 
     return output_filename
 
-def compile_file(file: str, lang: str="c", output: str="output", keep_all: bool=False, main: bool=True) -> str:
+def compile_file(file: str, lang: str="c", output: str="output", keep_all: bool=False, main: bool=True, no_std: bool=False) -> str:
     check_file(file)
 
     preprocessed = preprocess_file(file)
@@ -71,7 +71,8 @@ def compile_file(file: str, lang: str="c", output: str="output", keep_all: bool=
     tr = TypeResolver(TypeTable())
     sr = SymbolResolver(SymbolTable())
     cg = CodeGenerator(programming_language)
-    compiler = Compiler(cg, tr, sr, cc, cv)
+    std = not no_std
+    compiler = Compiler(cg, tr, sr, cc, cv, std=std)
 
     compiler.add_preamble()
     for node in ast:

@@ -7,6 +7,7 @@ def run_command(args):
     target_flags = []
     keep_all = False
     no_main = False
+    no_std = False
 
     if args.backend:
         backend = args.backend
@@ -26,6 +27,9 @@ def run_command(args):
     if args.no_main:
         no_main = args.no_main
 
+    if args.nostd:
+        no_std = args.nostd
+
     if args.lex:
         tokens = lex_file(args.lex)
         for tok in tokens:
@@ -43,7 +47,7 @@ def run_command(args):
         preprocess_file(args.preprocess)
 
     if args.compile:
-        compile_file(args.compile, backend, output, keep_all, not no_main)
+        compile_file(args.compile, backend, output, keep_all, not no_main, no_std)
 
     if args.to_object:
         compile_file_to_object(args.to_object, backend, output, target, target_flags, keep_all)

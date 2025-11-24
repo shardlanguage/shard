@@ -64,7 +64,7 @@ class ShardPreProcessor:
     def execute_include(self, file: str) -> None:
         file = file.strip('"').strip("'") + ".sd"
         if file.startswith(LIB_PREFIX):
-            file = LIB_PATH + file
+            file = LIB_PATH + file.split('/')[0] + '/' + file
 
         if file in self.included_files:
             return
