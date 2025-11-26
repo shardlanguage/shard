@@ -23,12 +23,8 @@ class LangC(ProgrammingLanguage):
         ]
         if extra_includes:
             code.extend([
-                "#include <sys/syscall.h>",
                 "#include <unistd.h>",
-                "#include <sys/types.h>",
-                "#include <sys/stat.h>",
-                "#include <time.h>",
-                "#include <signal.h>"
+                "#include <errno.h>"
             ])
         return '\n'.join(code)
 
