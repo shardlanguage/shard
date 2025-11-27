@@ -24,7 +24,8 @@ class LangC(ProgrammingLanguage):
         if extra_includes:
             code.extend([
                 "#include <unistd.h>",
-                "#include <errno.h>"
+                "#include <errno.h>",
+                "#include <stdlib.h>"
             ])
         return '\n'.join(code)
 
