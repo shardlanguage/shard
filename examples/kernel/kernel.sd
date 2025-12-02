@@ -1,0 +1,13 @@
+/*
+    Example: Kernel
+
+    A simple freestanding kernel which displays a character in VGA text mode
+*/
+
+func kmain() {
+    var vga: *u8 = 0xB8000 as *u8;
+    vga[0] = 'A';
+    vga[1] = 0x0F;
+
+    while 1 {}
+}

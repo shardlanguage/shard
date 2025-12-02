@@ -43,7 +43,20 @@ class ShardLexer:
         )
         self.tokens += tuple(self.keywords.values())
         
-    t_NUMBER = r'\d+(\.\d+)?'
+    def t_NUMBER(self, t):
+        r'(0b[01]+|0o[0-7]+|0x[0-9A-Fa-f]+|\d+(\.\d+)?([eE][+-]?\d+)?)'
+        s = t.value
+        if s.startswith('0b'):
+            t.value = int(s, 2)
+        elif s.startswith('0o'):
+            t.value = int(s, 8)
+        elif s.startswith('0x'):
+            t.value = int(s, 16)
+        elif '.' in s or 'e' in s or 'E' in s:
+            t.value = float(s)
+        else:
+            t.value = int(s)
+        return t
 
     def t_ID(self, t):
         r"[a-zA-Z_][a-zA-Z0-9_]*"

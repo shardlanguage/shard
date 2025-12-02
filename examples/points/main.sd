@@ -1,0 +1,19 @@
+/*
+    Example: Points
+
+    In this program, we create 2 points and "move" them
+*/
+
+// Include point.sd
+// This is possible thanks to __root__.sd, defined in the same directory
+@include point
+
+func main() {
+    // Create the points
+    var a: pt::Point = pt::create(0, 0, "Point A");
+    var b: pt::Point = pt::create(20, 35, "Point B");
+
+    // Move them
+    pt::move(&a, 10, 5);
+    pt::move(&b, 3, 42);
+}

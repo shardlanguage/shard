@@ -1,0 +1,13 @@
+/*
+    Example: Hello libc!
+
+    In this program, we simply call libc functions using inline C.
+*/
+
+// Include stdio.h (in generated C code)
+_c_ "#include <stdio.h>";
+
+func main() {
+    // Call printf
+    _c_ "printf(\"Hello world!\n\")";
+}
