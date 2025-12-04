@@ -1,34 +1,14 @@
 from shardc.cli.utils import compile_file, compile_file_to_executable, compile_file_to_object, lex_file, parse_file, preprocess_file
 
 def run_command(args):
-    backend = "c"
-    output = "output"
-    target = "clang"
-    target_flags = []
-    keep_all = False
-    no_main = False
-    no_std = False
-
-    if args.backend:
-        backend = args.backend
-
-    if args.output:
-        output = args.output
-
-    if args.target:
-        target = args.target
-
-    if args.target_flags:
-        target_flags.extend(args.target_flags)
-
-    if args.keep_all:
-        keep_all = args.keep_all
-    
-    if args.no_main:
-        no_main = args.no_main
-
-    if args.nostd:
-        no_std = args.nostd
+    backend = args.backend or "c"
+    output = args.output or "output"
+    target = args.target or "clang"
+    target_flags = args.target_flags or ""
+    keep_all = args.keep_all or False
+    no_main = args.no_main or False
+    no_std = args.nostd or False
+    main = not no_main
 
     if args.lex:
         tokens = lex_file(args.lex)
@@ -47,10 +27,10 @@ def run_command(args):
         preprocess_file(args.preprocess)
 
     if args.compile:
-        compile_file(args.compile, backend, output, keep_all, not no_main, no_std)
+        compile_file(args.compile, lang=backend, output=output, keep_all=keep_all, main=main, no_std=no_std)
 
     if args.to_object:
-        compile_file_to_object(args.to_object, backend, output, target, target_flags, keep_all)
+        compile_file_to_object(args.to_object, lang=backend, output=output, target=target, exflags=target_flags, keep_all=keep_all, main=main, no_std=no_std)
 
     if args.to_executable:
-        compile_file_to_executable(args.to_executable, backend, output, target, target_flags, keep_all)
+        compile_file_to_executable(args.to_executable, lang=backend, output=output, target=target, exflags=target_flags, keep_all=keep_all, main=main, no_std=no_std)

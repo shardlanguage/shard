@@ -55,7 +55,13 @@ class TypeResolver(Visitor):
         return self.type_table.get_type(tname)
 
     def resolve_NodeArrayType(self, node: NodeArrayType) -> ShardType:
-        base = self.resolve_type(node.name)
+        if isinstance(node.name, NodeNamespaceAccess):
+            base = self.resolve_NodeNamespaceAccess(node.name)
+        elif isinstance(node.name, NodeType):
+            base = self.resolve_NodeType(node.name)
+        else:
+            type_name = node.name.name if hasattr(node.name, "name") else str(node.name)
+            base = self.type_table.get_type(type_name)
         shardt = base.clone()
         shardt.name = f"{base.name}[{node.length}]"
         shardt.length = node.length

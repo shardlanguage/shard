@@ -1,0 +1,27 @@
+/*
+    Example: Fibonacci
+
+    Simple fibonacci array
+*/
+
+func fib(var n: i64, var out: *i64) {
+    if n <= 0 {
+        return;
+    }
+
+    var a: i64 = 0;
+    var b: i64 = 1;
+
+    for var i: i64 = 0; i < n; i += 1 {
+        out[i] = a;
+        var next: i64 = a + b;
+        a = b;
+        b = next;
+    }
+}
+
+func main() {
+    var result: [10]i64;
+
+    fib(20, result);
+}
