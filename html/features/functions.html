@@ -1,0 +1,209 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Functions &mdash; Shard 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Shard
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Functions</a><ul>
+<li><a class="reference internal" href="#summary">Summary</a></li>
+<li><a class="reference internal" href="#functions-and-procedures">Functions and procedures</a></li>
+<li><a class="reference internal" href="#how-to-define-a-function">How to define a function</a></li>
+<li><a class="reference internal" href="#local-symbols">Local symbols</a></li>
+<li><a class="reference internal" href="#returning-a-value">Returning a value</a></li>
+<li><a class="reference internal" href="#calling-a-function">Calling a function</a></li>
+<li><a class="reference internal" href="#nested-functions">Nested functions</a></li>
+<li><a class="reference internal" href="#the-main-function">The main function</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Shard</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/features/functions.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="functions">
+<h1>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h1>
+<hr class="docutils" />
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h2>
+<hr class="docutils" />
+<ul class="simple">
+<li><p><a class="reference internal" href="#functions-and-procedures"><span class="xref myst">Functions and procedures</span></a></p></li>
+<li><p><a class="reference internal" href="#how-to-define-a-function"><span class="xref myst">How to define a function</span></a></p></li>
+<li><p><a class="reference internal" href="#returning-a-value"><span class="xref myst">Returning a value</span></a></p></li>
+<li><p><a class="reference internal" href="#local-symbols"><span class="xref myst">Local symbols</span></a></p></li>
+<li><p><a class="reference internal" href="#calling-a-function"><span class="xref myst">Calling a function</span></a></p></li>
+<li><p><a class="reference internal" href="#nested-functions"><span class="xref myst">Nested functions</span></a></p></li>
+<li><p><a class="reference internal" href="#the-main-function"><span class="xref myst">The main function</span></a></p></li>
+</ul>
+</section>
+<section id="functions-and-procedures">
+<h2>Functions and procedures<a class="headerlink" href="#functions-and-procedures" title="Link to this heading"></a></h2>
+<hr class="docutils" />
+<p>In programming, a <strong>procedure</strong> (or a function) is like a program inside another program. The difference between both is that a function <strong>returns a value</strong>, unlike the procedure which does not.</p>
+<p>In several programming languages (such as C and C++), procedures are functions of type <code class="docutils literal notranslate"><span class="pre">void</span></code>. In Shard, this type does not exist as <code class="docutils literal notranslate"><span class="pre">void</span></code> but as <code class="docutils literal notranslate"><span class="pre">C_void</span></code>. It is very rare for the programmer to have to use it since the compiler generates it automatically.</p>
+</section>
+<section id="how-to-define-a-function">
+<h2>How to define a function<a class="headerlink" href="#how-to-define-a-function" title="Link to this heading"></a></h2>
+<hr class="docutils" />
+<p>Shard functions are designed using the following example:</p>
+<div class="highlight-sd notranslate"><div class="highlight"><pre><span></span>// function
+func f(p) -&gt; T {}
+// procedure
+func f(p) {}
+</pre></div>
+</div>
+<p>In this example, <code class="docutils literal notranslate"><span class="pre">f</span></code> is the <strong>name</strong> of the function, <code class="docutils literal notranslate"><span class="pre">p</span></code> is the required <strong>parameters</strong>, and, when it is not a procedure, <code class="docutils literal notranslate"><span class="pre">T</span></code> is the <strong>type of the value(s) the function will return</strong>. The function <strong>body</strong> is between <code class="docutils literal notranslate"><span class="pre">{</span></code> and <code class="docutils literal notranslate"><span class="pre">}</span></code>.</p>
+<p>Let’s define the function <code class="docutils literal notranslate"><span class="pre">foo</span></code>:</p>
+<div class="highlight-sd notranslate"><div class="highlight"><pre><span></span>func proc(var x: i32) -&gt; i32 {
+    return x;
+}
+</pre></div>
+</div>
+</section>
+<section id="local-symbols">
+<h2>Local symbols<a class="headerlink" href="#local-symbols" title="Link to this heading"></a></h2>
+<hr class="docutils" />
+<p>When you declare a variable, a structure or any other symbol inside a function, it will not be accessible in <strong>the global scope</strong> (outside of the function). That is because when you enter a function body, the compiler creates a new scope, called <strong>local scope</strong>, which is <strong>destroyed</strong> at the end of the function body.</p>
+<p>However, symbols which are defined <strong>outside of the functions</strong> (in the global scope) are accessible inside all the functions.</p>
+<p>Let’s take an example:</p>
+<div class="highlight-sd notranslate"><div class="highlight"><pre><span></span>var x: i32 = 5;
+func f() -&gt; i32 {
+    return x + 2;       // valid, because x is defined BEFORE and OUTSIDE the function
+}
+
+func g() {
+    var y: i32 = 10;
+}
+y *= 2;                 // not valid, because y is a LOCAL variable
+</pre></div>
+</div>
+</section>
+<section id="returning-a-value">
+<h2>Returning a value<a class="headerlink" href="#returning-a-value" title="Link to this heading"></a></h2>
+<hr class="docutils" />
+<p>A function returns a value using the <code class="docutils literal notranslate"><span class="pre">return</span></code> keyword. It can take a value or nothing. If it takes nothing, then the function is a procedure.</p>
+<div class="highlight-sd notranslate"><div class="highlight"><pre><span></span>// procedure
+func proc() {
+    return;
+}
+
+// function
+func f() -&gt; u8 {
+    return 12;
+}
+</pre></div>
+</div>
+</section>
+<section id="calling-a-function">
+<h2>Calling a function<a class="headerlink" href="#calling-a-function" title="Link to this heading"></a></h2>
+<hr class="docutils" />
+<p>You can call a function <code class="docutils literal notranslate"><span class="pre">f</span></code> like this: <code class="docutils literal notranslate"><span class="pre">f(p)</span></code>, where <code class="docutils literal notranslate"><span class="pre">p</span></code> is the <strong>values</strong> assigned to the function parameters. For example, let’s write a simple function that adds two numbers and returns the result:</p>
+<div class="highlight-sd notranslate"><div class="highlight"><pre><span></span>func add(var a: f32, var b: f32) -&gt; f32 {
+    return a + b;
+}
+
+var result: f32 = add(3, 4);
+</pre></div>
+</div>
+</section>
+<section id="nested-functions">
+<h2>Nested functions<a class="headerlink" href="#nested-functions" title="Link to this heading"></a></h2>
+<hr class="docutils" />
+<p>Nested functions are <strong>not supported</strong> in Shard. A nested function is a function defined inside another.</p>
+</section>
+<section id="the-main-function">
+<h2>The main function<a class="headerlink" href="#the-main-function" title="Link to this heading"></a></h2>
+<hr class="docutils" />
+<p>Every program must have a main function. This function is called <code class="docutils literal notranslate"><span class="pre">main</span></code>, and can only take two parameters: <code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">argc:</span> <span class="pre">C_int</span></code>, which stores the count of arguments in the command-line, and <code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">argv:</span> <span class="pre">**C_char</span></code>, which stores the arguments in the command-line.</p>
+<p><em><strong>Note:</strong> to avoid the obligation of defining <code class="docutils literal notranslate"><span class="pre">main()</span></code>, you can use the –no-main flag when compiling your code, but you need to provide an entry point to your linker.</em></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Wither__.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
