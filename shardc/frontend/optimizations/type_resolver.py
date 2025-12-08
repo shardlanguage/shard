@@ -119,8 +119,7 @@ class TypeResolver(Visitor):
         self.resolve_type(node.index)
 
     def resolve_NodeNamespaceAccess(self, node: NodeNamespaceAccess):
-        scoped_name = self._resolve_scoped_name(node)
-        return self.type_table.get_type(scoped_name)
+        return
 
     def resolve_NodeIDAccess(self, node: NodeIDAccess) -> ShardType | None:
         if isinstance(node.name, NodeT):

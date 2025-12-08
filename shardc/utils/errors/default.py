@@ -5,5 +5,5 @@ class ShardError:
         self.message = message
 
     def display(self):
-        print(f"error: {self.message}")
+        print(f"[shardc] error: {self.message}")
         sys.exit(1)

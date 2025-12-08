@@ -75,6 +75,11 @@ c *= 2;             // wrong
 ```
 
 ## Extern variables
-***Note**: this is an unfinished feature, so you might get bugs when using it.*
-
-The `extern` keyword preceding a declaration can be used to declare an extern symbol.
+The `extern` keyword preceding a declaration or a function definitioncan be used to declare an extern symbol. You can use it like this:
+```sd
+// for a variable
+extern var name: i32;
+// for a function
+extern func name(params) -> i32 {};
+```
+***Note**: DO NOT write in the body of extern functions or you will get an error from the C compiler.*

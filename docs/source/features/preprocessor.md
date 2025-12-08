@@ -54,3 +54,7 @@ The Shard PreProcessor provides the `@include` instruction, which is used to cop
 To include a library, you need to type `lib:` before the name of your file. SPP will search for `/usr/local/lib/shard/your_lib/your_lib/your-file.sd`.
 
 You **must** create at least one file named `__root__.sd` in your project directory for SPP to know from where to include files.
+
+## Messages
+---
+You can display messages during preprocessing with the `@message` instruction. Type the text you want to display next to it.

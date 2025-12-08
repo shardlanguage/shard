@@ -302,6 +302,12 @@ class ShardParser:
         """
         p[0] = NodeExternDeclaration(p[2])
 
+    def p_declaration_extern_function(self, p):
+        """
+        extern_declaration : EXTERN function_definition
+        """
+        p[0] = NodeExternDeclaration(p[2])
+
     def p_type_definition_alias(self, p):
         """
         type_definition : TYPE ID EQUAL type

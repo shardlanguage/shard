@@ -1,6 +1,7 @@
 import shlex
 
 from spp.constants import CONST, INCLUDE, LIB_PATH, LIB_PREFIX, MACRO, MESSAGE, ROOTFILE, STATEMENT_START, UNDEF
+from spp.error import SPPError_FileNotFound
 from spp.macro import SPPMacro
 from pathlib import Path
 
@@ -18,7 +19,7 @@ class ShardPreProcessor:
         for parent in [path.parent] + list(path.parents):
             if (parent / self.root).exists():
                 return parent
-        raise FileNotFoundError("could not find root.sd")
+        SPPError_FileNotFound(ROOTFILE).display()
 
     def process(self) -> None:
         with open(self.input_file, 'r') as file:

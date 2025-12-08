@@ -3,7 +3,7 @@ from shardc.frontend.tree.codeblocks import NodeCodeBlock
 from shardc.frontend.tree.namespace_def import NodeNamespaceDefinition
 from shardc.frontend.tree.node import Node
 from shardc.frontend.tree.structure_def import NodeStructureDefinition
-from shardc.frontend.tree.declarations import NodeVariableDeclaration
+from shardc.frontend.tree.declarations import NodeVariableDeclaration, NodeExternDeclaration
 from shardc.frontend.tree.function_def import NodeFunctionDefinition
 from shardc.frontend.tree.condition_struct import NodeIf, NodeElif, NodeElse, NodeCondition
 from shardc.frontend.tree.loop_struct import NodeLoopStructure
@@ -57,6 +57,7 @@ class ContentVerifier(Visitor):
             NodeStructureDefinition,
             NodeFunctionDefinition,
             NodeVariableDeclaration,
+            NodeExternDeclaration,
             NodeTypeAlias,
             NodeNewType
         ]

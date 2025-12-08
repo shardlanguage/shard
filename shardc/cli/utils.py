@@ -1,4 +1,3 @@
-# shardc/cli/utils.py
 import os
 import subprocess
 from shardc.backend.codegen.c import LangC

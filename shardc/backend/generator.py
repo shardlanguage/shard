@@ -2,6 +2,7 @@ from typing import Any
 
 from shardc.backend.codegen.lang import ProgrammingLanguage
 from shardc.backend.visitor import Visitor
+from shardc.frontend.symbols.function import ShardFunction
 from shardc.frontend.tree.codeblocks import NodeCodeBlock, NodeNamespaceBody, NodeStructureBody
 from shardc.frontend.tree.condition_struct import NodeCondition, NodeElif, NodeElse, NodeIf
 from shardc.frontend.tree.declarations import NodeExternDeclaration, NodeVariableDeclaration
@@ -304,7 +305,10 @@ class CodeGenerator(Visitor):
     def generate_NodeExternDeclaration(self, node: NodeExternDeclaration) -> str:
         symbol = node.symbol.accept(self)
 
-        return self.lang.declare_extern_symbol(symbol)
+        if not isinstance(node.symbol, NodeFunctionDefinition):
+            return self.lang.declare_extern_symbol(symbol)
+        else:
+            return self.lang.declare_extern_symbol(symbol).replace('{', '').replace('}', '')
 
     def generate_NodeIf(self, node: NodeIf) -> str:
         condition = node.condition.accept(self)

@@ -9,8 +9,10 @@ New contributors are welcome! Here is a detailed guide on how to contribute to t
 ## Contribute to the source code (compiler/docs)
 1. Fork the Shard repository (https://github.com/shardlanguage/shard)
 2. Add your changes (every text, message or comment **must be** in english)
-3. Commit your changes
-4. Make a detailed pull request
+3. Write **everything** you changed in [CHANGELOG.md](CHANGELOG.md)
+4. Update the documentation if needed
+5. Commit your changes
+6. Make a detailed pull request
 
 ## Report bugs
 If you want to report a bug, you can make an **Issue** on GitHub.

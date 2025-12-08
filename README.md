@@ -31,7 +31,7 @@ su
 ```
 **Step 4**: test the installation
 ```bash
-shardc -h
+shardc --version
 ```
 
 **Makefile and make.bat are used to build the docs locally!**

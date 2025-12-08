@@ -1,4 +1,5 @@
 from shardc.cli.utils import compile_file, compile_file_to_executable, compile_file_to_object, lex_file, parse_file, preprocess_file
+from shardc.utils.constants.meta import SHARDC_VERSION
 
 def run_command(args):
     backend = args.backend or "c"
@@ -9,6 +10,9 @@ def run_command(args):
     no_main = args.no_main or False
     no_std = args.nostd or False
     main = not no_main
+
+    if args.version:
+        print(SHARDC_VERSION)
 
     if args.lex:
         tokens = lex_file(args.lex)

@@ -1,4 +1,5 @@
 from shardc.backend.codegen.lang import ProgrammingLanguage
+from shardc.frontend.symbols import symbol
 
 class LangC(ProgrammingLanguage):
     def __init__(self):

@@ -5,6 +5,8 @@ from shardc.cli.run import run_command
 def cli():
     parser = argparse.ArgumentParser(description="The shardc compiler")
 
+    parser.add_argument("-v", "--version", action="store_true", help="Display compiler version")
+
     parser.add_argument("-l", "--lex", type=str, help="Lex source code")
     parser.add_argument("-p", "--parse", type=str, help="Parse source code")
     parser.add_argument("-t", "--tree", type=str, help="Print AST of source code")
