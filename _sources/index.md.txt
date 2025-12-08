@@ -42,7 +42,7 @@ su
 ```
 **Step 4**: test the installation
 ```bash
-shardc -h
+shardc --version
 ```
 
 ## Learn Shard

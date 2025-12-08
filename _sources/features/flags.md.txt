@@ -9,6 +9,7 @@
 ---
 | Short name    | Long name | Effect |
 | ----------    | --------- | ------ |
+| `-v`          | `--version` | Display the current version of `shardc` |
 | `-l`          | `--lex`   | Lex the source code of a file and display the tokens |
 | `-p`          | `--parse` | Parse the source code of a file to check eventual syntax errors |
 | `-t`          | `--tree`  | Get the AST of the source code of a file |

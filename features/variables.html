@@ -194,8 +194,14 @@ c *= 2;             // wrong
 </section>
 <section id="extern-variables">
 <h2>Extern variables<a class="headerlink" href="#extern-variables" title="Link to this heading"></a></h2>
-<p><em><strong>Note</strong>: this is an unfinished feature, so you might get bugs when using it.</em></p>
-<p>The <code class="docutils literal notranslate"><span class="pre">extern</span></code> keyword preceding a declaration can be used to declare an extern symbol.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">extern</span></code> keyword preceding a declaration or a function definitioncan be used to declare an extern symbol. You can use it like this:</p>
+<div class="highlight-sd notranslate"><div class="highlight"><pre><span></span>// for a variable
+extern var name: i32;
+// for a function
+extern func name(params) -&gt; i32 {};
+</pre></div>
+</div>
+<p><em><strong>Note</strong>: DO NOT write in the body of extern functions or you will get an error from the C compiler.</em></p>
 </section>
 </section>
 
