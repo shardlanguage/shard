@@ -1,3 +1,12 @@
+## Version 1.0.2
+- Updated documentation
+- Updated `README.md`
+- Added `update.sh`
+- Added `SHARDC_GIT_REPO_URL` to `shardc/utils/constants/meta.py`
+- Variables declared in for loops (e.g. `for var i: i32 = 0;...`) are now in a local scope
+- Added `##` token to reset the line counter
+- Compiler messages are colored
+
 ## Version 1.0.1
 - SPP does not use Python exceptions anymore
 - Added documentation about `@message`

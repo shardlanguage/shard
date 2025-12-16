@@ -1,4 +1,5 @@
 import os
+from re import sub
 import subprocess
 from shardc.backend.codegen.c import LangC
 from shardc.backend.compiler import Compiler

@@ -105,7 +105,7 @@ until x == y {
 
 ### The FOR loop
 ---
-The last loop is `for`. It first declares a variable, then checks a condition and does something at the end.
+The last loop is `for`. It first declares a variable, which is **local** (it cannot be used outside of the loop) then checks a condition and does something at the end.
 ```sd
 for var i: i32 = 0; i <= 5; i += 1 {
     // ...

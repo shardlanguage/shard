@@ -64,7 +64,8 @@ class ShardParser:
 
     def p_statement(self, p):
         """
-        statement : expression SEMI
+        statement : special
+                  | expression SEMI
                   | declaration SEMI
                   | codeblock
                   | conditional_structure
@@ -78,6 +79,13 @@ class ShardParser:
                   | type_definition SEMI
         """
         p[0] = p[1]
+
+    def p_special_reset_line(self, p):
+        """
+        special : RESET_LINE
+        """
+        p.lexer.lineno = 0
+        p[0] = None
 
     def p_expression_number(self, p):
         """

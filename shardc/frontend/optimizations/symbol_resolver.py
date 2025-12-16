@@ -250,10 +250,16 @@ class SymbolResolver(Visitor):
         self.resolve_symbol(node.branch)
 
     def resolve_NodeLoopFor(self, node: NodeLoopFor) -> None:
+        local_table = SymbolTable(parent=self.symbol_table)
+        old_table = self.symbol_table
+        self.symbol_table = local_table
+
         self.resolve_symbol(node.declaration)
         self.resolve_symbol(node.condition)
         self.resolve_symbol(node.update)
         self.resolve_symbol(node.branch)
+
+        self.symbol_table = old_table
 
     def resolve_NodeReturn(self, node: NodeReturn) -> None:
         if node.value is not None:

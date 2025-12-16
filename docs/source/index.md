@@ -6,6 +6,7 @@
 - [What is Shard?](#what-is-shard)
 - [Features](#features)
 - [Installation](#installation)
+- [Updating](#updating)
 - [Learn Shard](#learn-shard)
 - [Contributing](#contributing)
 
@@ -15,11 +16,11 @@
 
 ## Features
 ---
-- **C++/Rust-like syntax**, designed to be clean and modern
+- **C-like syntax**, but cleaner and modern
 - **Strong typing**: supports built-in and user-defined types
 - **Pointers** like in C
 - **Structures and arrays** easy to declare, initialize and access
-- **Powerful preprocessor** with pattern-based macros
+- **Preprocessor** with regex pattern-based macros
 - **Cross-platform backend**: compiles to C code and supports freestanding, configurable target compiler
 - **Extensible compiler**: adding backends is easy
 - **Namespaces** organize your code into logical units
@@ -43,6 +44,14 @@ su
 **Step 4**: test the installation
 ```bash
 shardc --version
+```
+## Updating
+To update Shard automatically, run `update.sh`:
+```sh
+cd shard
+chmod +x update.sh
+su
+./update.sh
 ```
 
 ## Learn Shard

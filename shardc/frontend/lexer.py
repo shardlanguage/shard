@@ -33,6 +33,7 @@ class ShardLexer:
             "namespace": "NAMESPACE"
         }
         self.tokens = (
+            "RESET_LINE",
             "NUMBER", "ID", "CHAR", "STRING",
             "PLUS", "MINUS", "STAR", "SLASH", "PERCENT",
             "SHIFTL", "SHIFTR", "AMPERSAND", "PIPE", "CARET", "TILDE",
@@ -43,6 +44,11 @@ class ShardLexer:
         )
         self.tokens += tuple(self.keywords.values())
         
+    def t_RESET_LINE(self, t):
+        r'\#\#'
+        t.lexer.lineno = 0
+        return t
+
     def t_NUMBER(self, t):
         r'(0b[01]+|0o[0-7]+|0x[0-9A-Fa-f]+|\d+(\.\d+)?([eE][+-]?\d+)?)'
         s = t.value
