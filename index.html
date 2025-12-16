@@ -47,6 +47,7 @@
 <li><a class="reference internal" href="#what-is-shard">What is Shard?</a></li>
 <li><a class="reference internal" href="#features">Features</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#updating">Updating</a></li>
 <li><a class="reference internal" href="#learn-shard">Learn Shard</a></li>
 <li><a class="reference internal" href="#contributing">Contributing</a></li>
 </ul>
@@ -87,6 +88,7 @@
 <li><p><a class="reference internal" href="#what-is-shard"><span class="xref myst">What is Shard?</span></a></p></li>
 <li><p><a class="reference internal" href="#features"><span class="xref myst">Features</span></a></p></li>
 <li><p><a class="reference internal" href="#installation"><span class="xref myst">Installation</span></a></p></li>
+<li><p><a class="reference internal" href="#updating"><span class="xref myst">Updating</span></a></p></li>
 <li><p><a class="reference internal" href="#learn-shard"><span class="xref myst">Learn Shard</span></a></p></li>
 <li><p><a class="reference internal" href="contributing.html"><span class="doc std std-doc">Contributing</span></a></p></li>
 </ul>
@@ -100,11 +102,11 @@
 <h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
 <hr class="docutils" />
 <ul class="simple">
-<li><p><strong>C++/Rust-like syntax</strong>, designed to be clean and modern</p></li>
+<li><p><strong>C-like syntax</strong>, but cleaner and modern</p></li>
 <li><p><strong>Strong typing</strong>: supports built-in and user-defined types</p></li>
 <li><p><strong>Pointers</strong> like in C</p></li>
 <li><p><strong>Structures and arrays</strong> easy to declare, initialize and access</p></li>
-<li><p><strong>Powerful preprocessor</strong> with pattern-based macros</p></li>
+<li><p><strong>Preprocessor</strong> with regex pattern-based macros</p></li>
 <li><p><strong>Cross-platform backend</strong>: compiles to C code and supports freestanding, configurable target compiler</p></li>
 <li><p><strong>Extensible compiler</strong>: adding backends is easy</p></li>
 <li><p><strong>Namespaces</strong> organize your code into logical units</p></li>
@@ -129,6 +131,16 @@ su
 </div>
 <p><strong>Step 4</strong>: test the installation</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>shardc<span class="w"> </span>--version
+</pre></div>
+</div>
+</section>
+<section id="updating">
+<h2>Updating<a class="headerlink" href="#updating" title="Link to this heading"></a></h2>
+<p>To update Shard automatically, run <code class="docutils literal notranslate"><span class="pre">update.sh</span></code>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>shard
+chmod<span class="w"> </span>+x<span class="w"> </span>update.sh
+su
+./update.sh
 </pre></div>
 </div>
 </section>

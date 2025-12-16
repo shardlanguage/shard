@@ -136,6 +136,7 @@
 <p>The Shard PreProcessor provides the <code class="docutils literal notranslate"><span class="pre">&#64;include</span></code> instruction, which is used to copy the content of a Shard file inside another Shard file. You do not need to specify the extension of the file you want to include, because SPP automatically adds “.sd” at the end of the filename.</p>
 <p>To include a library, you need to type <code class="docutils literal notranslate"><span class="pre">lib:</span></code> before the name of your file. SPP will search for <code class="docutils literal notranslate"><span class="pre">/usr/local/lib/shard/your_lib/your_lib/your-file.sd</span></code>.</p>
 <p>You <strong>must</strong> create at least one file named <code class="docutils literal notranslate"><span class="pre">__root__.sd</span></code> in your project directory for SPP to know from where to include files.</p>
+<p>This instruction automatically generates the <code class="docutils literal notranslate"><span class="pre">##</span></code> token, which resets the line counter.</p>
 </section>
 <section id="messages">
 <h2>Messages<a class="headerlink" href="#messages" title="Link to this heading"></a></h2>

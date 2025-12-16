@@ -55,6 +55,8 @@ To include a library, you need to type `lib:` before the name of your file. SPP 
 
 You **must** create at least one file named `__root__.sd` in your project directory for SPP to know from where to include files.
 
+This instruction automatically generates the `##` token, which resets the line counter.
+
 ## Messages
 ---
 You can display messages during preprocessing with the `@message` instruction. Type the text you want to display next to it.
